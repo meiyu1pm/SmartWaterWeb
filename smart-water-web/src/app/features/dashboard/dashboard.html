@@ -1,0 +1,49 @@
+<!-- 第一行：全局概览指标 -->
+<nz-row [nzGutter]="16" class="kpi-row">
+  <nz-col [nzSpan]="6" *ngFor="let item of overviewKpi">
+    <nz-card class="overview-card">
+      <div class="card-header">
+        <span class="card-title">{{ item.title }}</span>
+        <span class="card-trend" [style.color]="item.trend.startsWith('+') ? '#f5222d' : '#52c41a'">
+          {{ item.trend }}
+        </span>
+      </div>
+      <div class="card-value" [style.color]="item.color">
+        {{ item.value }}
+        <span class="card-unit">{{ item.unit }}</span>
+      </div>
+    </nz-card>
+  </nz-col>
+</nz-row>
+
+<!-- 第二行：左右分栏 -->
+<nz-row [nzGutter]="16" class="content-row">
+  <!-- 左侧：全局总流量趋势 -->
+  <nz-col [nzSpan]="16">
+    <nz-card nzTitle="全网24小时总流量趋势" class="content-card">
+      <app-time-line-chart
+        yAxisName="流量(m³/h)"
+        [chartData]="totalFlowData"
+        lineColor="#1677ff">
+      </app-time-line-chart>
+    </nz-card>
+  </nz-col>
+
+  <!-- 右侧：最新告警列表 -->
+  <nz-col [nzSpan]="8">
+    <nz-card nzTitle="最新告警动态" class="content-card">
+      <div class="alarm-list">
+        <div class="alarm-item" *ngFor="let item of latestAlarmList">
+          <div class="alarm-left">
+            <nz-badge [nzStatus]="item.level"></nz-badge>
+            <span class="alarm-content">{{ item.content }}</span>
+          </div>
+          <div class="alarm-right">
+            <span class="alarm-area">{{ item.area }}</span>
+            <span class="alarm-time">{{ item.time }}</span>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </nz-col>
+</nz-row>

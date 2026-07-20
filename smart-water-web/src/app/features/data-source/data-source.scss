@@ -1,0 +1,82 @@
+.kpi-row {
+  margin-bottom: 16px;
+}
+
+.kpi-card {
+  .kpi-title {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  .kpi-value {
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+
+    .kpi-unit {
+      font-size: 14px;
+      font-weight: normal;
+      margin-left: 4px;
+    }
+  }
+}
+
+.filter-card {
+  margin-bottom: 16px;
+
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+.table-card {
+  .state-spin {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+  }
+
+  .state-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    gap: 12px;
+
+    .error-icon {
+      font-size: 20px;
+      color: #ff4d4f;
+    }
+
+    .error-text {
+      color: #666;
+      font-size: 14px;
+    }
+  }
+
+  .state-empty {
+    padding: 40px 0;
+  }
+
+  .endpoint-cell {
+    .port-text {
+      color: #999;
+    }
+  }
+}
+
+:host ::ng-deep .ant-card-body {
+  padding: 16px;
+}
+
+.kpi-card {
+  border-radius: 8px;
+  
+  .kpi-title {
+    margin-bottom: 12px;
+  }
+}

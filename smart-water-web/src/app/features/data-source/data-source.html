@@ -1,0 +1,220 @@
+<!-- ============ 第一行：KPI 指标卡片 ============ -->
+<nz-row [nzGutter]="16" class="kpi-row">
+  <nz-col [nzSpan]="6" *ngFor="let item of kpiList">
+    <nz-card class="kpi-card">
+      <div class="kpi-title">{{ item.title }}</div>
+      <div class="kpi-value" [style.color]="item.color">
+        {{ item.value }}
+        <span class="kpi-unit">{{ item.unit }}</span>
+      </div>
+    </nz-card>
+  </nz-col>
+</nz-row>
+
+<!-- ============ 第二行：搜索筛选栏 + 操作按钮 ============ -->
+<nz-card class="filter-card">
+  <div class="filter-bar">
+    <nz-input-group nzPrefixIcon="search" style="width: 240px;">
+      <input type="text" nz-input placeholder="数据源编号 / 名称"
+             [(ngModel)]="queryParams.keyword"
+             (keyup.enter)="onSearch()" />
+    </nz-input-group>
+
+    <nz-select style="width: 160px; margin-left: 12px;"
+               nzPlaceHolder="数据源类型"
+               [(ngModel)]="queryParams.sourceType"
+               nzAllowClear>
+      <nz-option *ngFor="let opt of typeOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
+    </nz-select>
+
+    <nz-select style="width: 140px; margin-left: 12px;"
+               nzPlaceHolder="状态"
+               [(ngModel)]="queryParams.status"
+               nzAllowClear>
+      <nz-option *ngFor="let opt of statusOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
+    </nz-select>
+
+    <button nz-button nzType="primary" style="margin-left: 12px;" (click)="onSearch()">
+      <span nz-icon nzType="search"></span>查询
+    </button>
+    <button nz-button style="margin-left: 8px;" (click)="onReset()">
+      <span nz-icon nzType="reload"></span>重置
+    </button>
+
+    <button nz-button nzType="primary" style="margin-left: auto;" (click)="openCreateModal()">
+      <span nz-icon nzType="plus"></span>新增数据源
+    </button>
+  </div>
+</nz-card>
+
+<!-- ============ 第三行：数据源表格 ============ -->
+<nz-card class="table-card">
+  <nz-spin *ngIf="loading" nzTip="数据加载中，请稍候" class="state-spin">
+    <div style="height: 200px;"></div>
+  </nz-spin>
+
+  <div *ngIf="errorMsg && !loading" class="state-error">
+    <span nz-icon nzType="close-circle" class="error-icon"></span>
+    <span class="error-text">{{ errorMsg }}</span>
+    <button nz-button nzType="primary" nzSize="small" (click)="loadList()" style="margin-left: 12px;">
+      重新查询
+    </button>
+  </div>
+
+  <ng-container *ngIf="!loading && !errorMsg">
+    <nz-table
+      #table
+      [nzData]="tableList"
+      [nzFrontPagination]="false"
+      [nzTotal]="total"
+      [nzPageIndex]="queryParams.pageIndex"
+      [nzPageSize]="queryParams.pageSize"
+      [nzPageSizeOptions]="pageSizeOptions"
+      (nzPageIndexChange)="onPageIndexChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      nzSize="middle"
+      [nzScroll]="{ x: '1200px' }">
+      <thead>
+        <tr>
+          <th>数据源编号</th>
+          <th>数据源名称</th>
+          <th>类型</th>
+          <th>协议</th>
+          <th>连接地址</th>
+          <th>采集频率</th>
+          <th>所属组织</th>
+          <th nzAlign="center">状态</th>
+          <th>最近更新时间</th>
+          <th nzAlign="center">启用</th>
+          <th nzAlign="center" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="tableList.length > 0; else emptyTpl">
+          <tr *ngFor="let item of tableList">
+            <td>{{ item.sourceCode }}</td>
+            <td>{{ item.sourceName }}</td>
+            <td>
+              <nz-tag [nzColor]="'blue'">{{ typeText[item.sourceType] || item.sourceType }}</nz-tag>
+            </td>
+            <td>{{ protocolText[item.protocol] || item.protocol }}</td>
+            <td class="endpoint-cell">
+              {{ item.endpoint }}<span class="port-text" *ngIf="hasPort(item)">:{{ item.port }}</span>
+            </td>
+            <td>{{ item.collectInterval }}</td>
+            <td>{{ item.ownerOrg }}</td>
+            <td nzAlign="center">
+              <nz-badge
+                [nzStatus]="item.status === 'online' ? 'success' : item.status === 'offline' ? 'warning' : 'error'"
+                [nzText]="statusText[item.status] || item.status">
+              </nz-badge>
+            </td>
+            <td>{{ item.lastUpdateTime }}</td>
+            <td nzAlign="center">
+              <nz-switch
+                [ngModel]="item.status === 'online'"
+                (ngModelChange)="onToggleStatus(item, $event)"
+                [nzDisabled]="item.status === 'error'">
+              </nz-switch>
+            </td>
+            <td nzAlign="center" nzRight>
+              <button nz-button nzType="link" nzSize="small"
+                      [nzLoading]="testingId === item.id"
+                      (click)="onTestConnection(item)">
+                测试
+              </button>
+              <button nz-button nzType="link" nzSize="small" (click)="openEditModal(item)">
+                编辑
+              </button>
+              <button nz-button nzDanger nzType="link" nzSize="small"
+                      nz-popconfirm
+                      nzPopconfirmTitle="确定删除该数据源吗？删除后不可恢复。"
+                      (nzOnConfirm)="onDelete(item)">
+                删除
+              </button>
+            </td>
+          </tr>
+        </ng-container>
+        <ng-template #emptyTpl>
+          <tr>
+            <td colspan="11">
+              <nz-empty nzDescription="暂无数据源数据" class="state-empty"></nz-empty>
+            </td>
+          </tr>
+        </ng-template>
+      </tbody>
+    </nz-table>
+  </ng-container>
+</nz-card>
+
+<!-- ============ 新增/编辑弹窗 ============ -->
+<nz-modal
+  [(nzVisible)]="isModalVisible"
+  [nzTitle]="modalTitle"
+  [nzWidth]="640"
+  [nzOkLoading]="isModalLoading"
+  (nzOnCancel)="handleCancel()"
+  (nzOnOk)="handleOk()">
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="horizontal">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired nzFor="sourceCode">数据源编号</nz-form-label>
+        <nz-form-control [nzSpan]="16" nzErrorTip="请输入英文/数字/下划线组合">
+          <input nz-input formControlName="sourceCode" placeholder="如 DS-FT-001" id="sourceCode" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired nzFor="sourceName">数据源名称</nz-form-label>
+        <nz-form-control [nzSpan]="16" nzErrorTip="请输入名称（最多50字）">
+          <input nz-input formControlName="sourceName" placeholder="如 经开6分区流量计" id="sourceName" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired>数据源类型</nz-form-label>
+        <nz-form-control [nzSpan]="7" nzErrorTip="请选择类型">
+          <nz-select formControlName="sourceType" nzPlaceHolder="选择类型">
+            <nz-option *ngFor="let opt of typeOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
+          </nz-select>
+        </nz-form-control>
+        <nz-form-label [nzSpan]="3" nzRequired nzFor="protocol" style="text-align: center;">协议</nz-form-label>
+        <nz-form-control [nzSpan]="6" nzErrorTip="请选择协议">
+          <nz-select formControlName="protocol" nzPlaceHolder="选择协议">
+            <nz-option *ngFor="let opt of protocolOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired nzFor="endpoint">连接地址</nz-form-label>
+        <nz-form-control [nzSpan]="12" nzErrorTip="请输入连接地址">
+          <input nz-input formControlName="endpoint" placeholder="IP或URL" id="endpoint" />
+        </nz-form-control>
+        <nz-form-label [nzSpan]="2" nzFor="port" style="text-align: center;">端口</nz-form-label>
+        <nz-form-control [nzSpan]="4" nzErrorTip="端口范围 1-65535">
+          <input nz-input type="number" formControlName="port" placeholder="端口" id="port" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired nzFor="collectInterval">采集频率</nz-form-label>
+        <nz-form-control [nzSpan]="7" nzErrorTip="请输入采集频率">
+          <input nz-input formControlName="collectInterval" placeholder="如 15s / 1min / 1h" id="collectInterval" />
+        </nz-form-control>
+        <nz-form-label [nzSpan]="3" nzRequired nzFor="ownerOrg" style="text-align: center;">组织</nz-form-label>
+        <nz-form-control [nzSpan]="6" nzErrorTip="请输入所属组织">
+          <input nz-input formControlName="ownerOrg" placeholder="所属组织" id="ownerOrg" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzFor="remark">备注</nz-form-label>
+        <nz-form-control [nzSpan]="16" nzErrorTip="备注最多200字">
+          <textarea nz-input formControlName="remark" [nzAutosize]="{ minRows: 2, maxRows: 4 }"
+                    placeholder="数据源用途说明（选填）" id="remark"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>

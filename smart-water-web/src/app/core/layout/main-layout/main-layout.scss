@@ -1,0 +1,42 @@
+.full-layout {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.logo {
+  height: 64px;
+  line-height: 64px;
+  text-align: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header {
+  background: #fff;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .header-user {
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+.content {
+  margin: 16px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: auto;
+}

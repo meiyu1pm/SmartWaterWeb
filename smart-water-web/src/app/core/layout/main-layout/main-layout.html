@@ -1,0 +1,29 @@
+<nz-layout class="full-layout">
+  <!-- 左侧侧边栏 -->
+  <nz-sider nzWidth="220px" nzTheme="dark">
+    <div class="logo">智能水务算法平台</div>
+    <ul nz-menu nzTheme="dark" nzMode="inline">
+      <li nz-menu-item 
+          *ngFor="let menu of menuList"
+          [nzDisabled]="menu.disabled"
+          [routerLink]="menu.path"
+          routerLinkActive="ant-menu-item-selected">
+        {{ menu.title }}
+      </li>
+    </ul>
+  </nz-sider>
+
+  <!-- 右侧主区域 -->
+  <nz-layout>
+    <!-- 顶部导航栏 -->
+    <nz-header class="header">
+      <div class="header-title">智能水务算法应用平台</div>
+      <div class="header-user">管理员</div>
+    </nz-header>
+
+    <!-- 主内容区 -->
+    <nz-content class="content">
+      <router-outlet></router-outlet>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

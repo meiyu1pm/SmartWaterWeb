@@ -1,0 +1,77 @@
+.filter-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.kpi-row {
+  margin-bottom: 16px;
+
+  .kpi-card {
+    .kpi-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.2;
+
+      .kpi-unit {
+        font-size: 14px;
+        font-weight: 400;
+        margin-left: 4px;
+        color: #999;
+      }
+    }
+  }
+}
+
+.content-row {
+  margin-bottom: 16px;
+
+  .content-card {
+    height: 100%;
+  }
+}
+
+.risk-list {
+  .risk-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .risk-name {
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .risk-rate {
+      font-size: 13px;
+      color: #666;
+      margin-left: 12px;
+    }
+  }
+}
+
+.chart-placeholder {
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border-radius: 4px;
+
+  .placeholder-text {
+    color: #999;
+    font-size: 14px;
+  }
+}

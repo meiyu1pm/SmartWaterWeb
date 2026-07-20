@@ -1,0 +1,85 @@
+<!-- 顶部筛选栏 -->
+<div class="filter-bar">
+  <nz-select style="width: 200px;" nzPlaceHolder="选择分区/DMA">
+    <nz-option nzLabel="全部分区" nzValue="all"></nz-option>
+    <nz-option nzLabel="经开6分区" nzValue="area1"></nz-option>
+    <nz-option nzLabel="纬二路片区" nzValue="area2"></nz-option>
+  </nz-select>
+
+  <nz-range-picker style="margin-left: 16px;"></nz-range-picker>
+
+  <button nz-button nzType="primary" style="margin-left: 16px;">运行分析</button>
+  <button nz-button style="margin-left: 8px;">导出报告</button>
+</div>
+
+<!-- 第一行：6个KPI指标卡 -->
+<nz-row [nzGutter]="16" class="kpi-row">
+  <nz-col [nzSpan]="4" *ngFor="let item of kpiList">
+    <nz-card class="kpi-card">
+      <div class="kpi-title">{{ item.title }}</div>
+      <div class="kpi-value" [style.color]="item.color">
+        {{ item.value }}
+        <span class="kpi-unit">{{ item.unit }}</span>
+      </div>
+    </nz-card>
+  </nz-col>
+</nz-row>
+
+<!-- 第二行：左右分栏 -->
+<nz-row [nzGutter]="16" class="content-row">
+  <!-- 左侧：分区风险列表 -->
+  <nz-col [nzSpan]="8">
+    <nz-card nzTitle="分区风险概览" class="content-card">
+      <div class="risk-list">
+        <div class="risk-item" *ngFor="let item of areaRiskData">
+          <span class="risk-name">{{ item.name }}</span>
+          <nz-tag [nzColor]="item.level === 'high' ? '#f5222d' : item.level === 'medium' ? '#faad14' : '#52c41a'">
+            {{ item.level === 'high' ? '高风险' : item.level === 'medium' ? '中风险' : '低风险' }}
+          </nz-tag>
+          <span class="risk-rate">漏损率 {{ item.leakRate }}</span>
+        </div>
+      </div>
+    </nz-card>
+  </nz-col>
+
+  <!-- 右侧：流量压力时序曲线（占位，后续接ECharts） -->
+  <nz-col [nzSpan]="16">
+    <nz-card nzTitle="流量/压力历史趋势" class="content-card">
+      <app-time-line-chart [chartData]="flowChartData"></app-time-line-chart>
+    </nz-card>
+  </nz-col>
+</nz-row>
+
+<!-- 第三行：左右分栏 -->
+<nz-row [nzGutter]="16" class="content-row">
+  <!-- 左侧：异常点表格 -->
+  <nz-col [nzSpan]="12">
+    <nz-card nzTitle="漏损异常点列表" class="content-card">
+      <nz-table [nzData]="anomalyTableData" [nzFrontPagination]="false" nzSize="small">
+        <thead>
+          <tr>
+            <th>异常时间</th>
+            <th>监测点位</th>
+            <th>异常分数</th>
+            <th>异常类型</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of anomalyTableData">
+            <td>{{ data.time }}</td>
+            <td>{{ data.point }}</td>
+            <td>{{ data.score }}</td>
+            <td>{{ data.type }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </nz-card>
+  </nz-col>
+
+  <!-- 右侧：夜间最小流量图 -->
+  <nz-col [nzSpan]="12">
+    <nz-card nzTitle="夜间最小流量趋势" class="content-card">
+      <app-time-line-chart [chartData]="nightFlowData"></app-time-line-chart>
+    </nz-card>
+  </nz-col>
+</nz-row>

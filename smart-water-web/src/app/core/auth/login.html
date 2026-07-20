@@ -1,0 +1,43 @@
+<div class="login-wrapper">
+  <nz-card class="login-card">
+    <div class="login-title">智能水务算法应用平台</div>
+    <form nz-form>
+      <nz-form-item>
+        <nz-form-label>用户名</nz-form-label>
+        <nz-form-control>
+          <input 
+            nz-input 
+            placeholder="请输入用户名" 
+            [(ngModel)]="loginForm.username"
+            name="username"
+            (keyup.enter)="onLogin()"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>密码</nz-form-label>
+        <nz-form-control>
+          <input 
+            nz-input 
+            type="password" 
+            placeholder="请输入密码" 
+            [(ngModel)]="loginForm.password"
+            name="password"
+            (keyup.enter)="onLogin()"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <button 
+          nz-button 
+          nzType="primary" 
+          class="login-form-button"
+          [nzLoading]="loading"
+          (click)="onLogin()"
+        >
+          登 录
+        </button>
+      </nz-form-item>
+    </form>
+  </nz-card>
+</div>
