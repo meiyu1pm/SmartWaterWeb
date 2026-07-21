@@ -1,66 +1,47 @@
+/* ============ KPI 指标卡片 ============ */
 .kpi-row {
   margin-bottom: 16px;
-}
 
-.kpi-card {
-  .kpi-title {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 8px;
-  }
+  .kpi-card {
+    border-radius: 8px;
 
-  .kpi-value {
-    font-size: 32px;
-    font-weight: 600;
-    line-height: 1.2;
-
-    .kpi-unit {
+    .kpi-title {
       font-size: 14px;
-      font-weight: normal;
-      margin-left: 4px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 600;
+      line-height: 1.2;
+
+      .kpi-unit {
+        font-size: 14px;
+        font-weight: 400;
+        margin-left: 4px;
+        color: #999;
+      }
     }
   }
 }
 
+/* ============ 搜索筛选栏 ============ */
 .filter-card {
   margin-bottom: 16px;
+  border-radius: 8px;
 
   .filter-bar {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 0;
   }
 }
 
+/* ============ 数据表格 ============ */
 .table-card {
-  .state-spin {
-    display: flex;
-    justify-content: center;
-    padding: 40px 0;
-  }
-
-  .state-error {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 0;
-    gap: 12px;
-
-    .error-icon {
-      font-size: 20px;
-      color: #ff4d4f;
-    }
-
-    .error-text {
-      color: #666;
-      font-size: 14px;
-    }
-  }
-
-  .state-empty {
-    padding: 40px 0;
-  }
+  border-radius: 8px;
 
   .endpoint-cell {
     .port-text {
@@ -69,14 +50,47 @@
   }
 }
 
-:host ::ng-deep .ant-card-body {
-  padding: 16px;
+/* ============ 4种状态样式 ============ */
+
+/* 加载中 */
+.state-spin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+
+  ::ng-deep .ant-spin {
+    max-height: initial;
+  }
 }
 
-.kpi-card {
-  border-radius: 8px;
-  
-  .kpi-title {
-    margin-bottom: 12px;
+/* 空数据 */
+.state-empty {
+  padding: 40px 0;
+}
+
+/* 异常错误 */
+.state-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+
+  .error-icon {
+    font-size: 20px;
+    color: #f5222d;
+    margin-right: 8px;
+  }
+
+  .error-text {
+    font-size: 14px;
+    color: #f5222d;
+  }
+}
+
+/* ============ 表格内操作按钮间距 ============ */
+::ng-deep .ant-table-tbody > tr > td {
+  .ant-btn-link {
+    padding: 0 4px;
   }
 }

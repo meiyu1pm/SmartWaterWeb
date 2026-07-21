@@ -5,7 +5,7 @@
     <ul nz-menu nzTheme="dark" nzMode="inline">
       <li nz-menu-item 
           *ngFor="let menu of menuList"
-          [nzDisabled]="menu.disabled"
+          [nzDisabled]="!!menu.disabled"
           [routerLink]="menu.path"
           routerLinkActive="ant-menu-item-selected">
         {{ menu.title }}

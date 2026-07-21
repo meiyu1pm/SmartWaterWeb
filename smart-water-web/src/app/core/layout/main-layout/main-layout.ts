@@ -12,10 +12,10 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
   styleUrl: './main-layout.scss'
 })
 export class MainLayout {
-  menuList = [
+  menuList: { path: string; title: string; disabled?: boolean }[] = [
     { path: '/dashboard', title: '综合驾驶舱' },
     { path: '/leakage', title: '漏损控制' },
     { path: '/data-source', title: '数据源管理' },
-    { path: '/data-quality', title: '数据质量中心', disabled: true },
+    { path: '/data-quality', title: '数据质量中心' },
   ];
 }
