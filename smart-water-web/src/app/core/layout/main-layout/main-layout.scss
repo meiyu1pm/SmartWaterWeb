@@ -40,3 +40,11 @@
   border-radius: 8px;
   overflow: auto;
 }
+
+.logo-img {
+  /* 三个值依次为：最小高度、随视口变化的首选高度、最大高度 */
+  height: clamp(24px, 3vw, 48px);
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+}
