@@ -4,6 +4,21 @@
 
 ---
 
+## 技术栈
+| 技术 | 版本 | 用途 |
+| :--- | :--- | :--- |
+| Angular | 21 | 前端框架 |
+| TypeScript | 5.9 | 前端语言 |
+| NG-ZORRO (ng-zorro-antd) | 21 | UI 组件库 |
+| ECharts + ngx-echarts | 6 + 21 | 图表可视化 |
+| RxJS | 7.8 | 响应式数据流 |
+| SCSS | — | 样式预处理 |
+| FastAPI | — | 后端 REST API 框架 |
+| Uvicorn | — | ASGI 服务器 |
+| Python | 3.11 | 后端语言 |
+
+---
+
 ## 环境准备
 启动项目前，请确保本地已安装以下基础环境：
 | 环境 | 版本要求 | 验证命令 |
@@ -40,6 +55,7 @@
         ```
 
 3.  安装后端依赖（首次启动执行）
+    例如：
     ```bash
     pip install fastapi uvicorn pydantic
     ```
@@ -63,7 +79,7 @@
 
 1.  进入前端项目目录
     ```bash
-    cd frontend
+    cd smart-water-web
     ```
 
 2.  安装前端依赖（首次启动执行）
@@ -93,27 +109,51 @@
 | 页面模块 | 功能点 | 数据状态 |
 | :--- | :--- | :--- |
 | 首页 Dashboard | 全局概览 KPI 指标卡、全网 24 小时流量趋势、最新告警动态列表 | Mock 模拟数据 |
-| 漏损控制页面 | 顶部 KPI 指标卡、分区风险概览、流量/压力历史趋势图 | 已对接真实后端接口 |
-| 漏损控制页面 | 漏损异常点表格、夜间最小流量趋势图 | 已对接真实后端接口 |
+| 漏损控制页面 | 顶部 KPI 指标卡、分区风险概览、流量/压力历史趋势图 | 已对接后端接口 |
+| 漏损控制页面 | 漏损异常点表格、夜间最小流量趋势图 | 已对接后端接口 |
+| 数据源管理 | 页面框架已搭建，菜单项置灰（待开发） | 未对接 |
+
+---
+
+## 后端 API 接口
+| 方法 | 路径 | 说明 |
+| :--- | :--- | :--- |
+| GET | `/api/v1/leakage/kpi` | 漏损控制 KPI 指标（总供水量、总用水量、漏损率等） |
+| GET | `/api/v1/leakage/area-risk` | 分区风险评估（高/中/低风险分区列表） |
+| GET | `/api/v1/leakage/flow-trend` | 24 小时流量趋势数据 |
+| GET | `/api/v1/leakage/anomalies` | 漏损异常点检测列表 |
+| GET | `/api/v1/leakage/night-flow` | 近 7 日夜间最小流量趋势 |
+
+> 接口返回统一响应格式：`{ code, message, data, trace_id }`，code=0 表示成功。
 
 ---
 
 ## 项目目录结构
 ```
 ZSmartWaterWeb/
-├── backend/                 # 后端 FastAPI 工程
-│   └── main.py             # 服务入口，包含所有业务接口与统一响应封装
-├── frontend/                # 前端 Angular 工程
+├── backend/                       # 后端 FastAPI 工程
+│   ├── main.py                    # 服务入口，包含所有业务接口与统一响应封装
+│   ├── run.py                     # 替代启动入口
+│   └── requirement.txt            # Python 依赖清单
+├── smart-water-web/               # 前端 Angular 工程
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── features/   # 业务页面模块
-│   │   │   │   ├── dashboard/  # 首页概览模块
-│   │   │   │   └── leakage/    # 漏损控制模块
-│   │   │   └── shared/     # 通用能力层
-│   │   │       ├── charts/     # 通用图表组件
-│   │   │       └── models/     # 通用类型定义
-│   │   └── environments/   # 环境配置（接口地址等）
+│   │   │   ├── core/              # 核心能力层
+│   │   │   │   ├── auth/          # 认证模块
+│   │   │   │   └── layout/        # 主布局（侧边菜单 + 内容区）
+│   │   │   ├── features/          # 业务页面模块
+│   │   │   │   ├── dashboard/     # 综合驾驶舱
+│   │   │   │   ├── leakage/       # 漏损控制
+│   │   │   │   └── data-source/   # 数据源管理（预留）
+│   │   │   └── shared/            # 通用能力层
+│   │   │       ├── charts/        # 通用图表组件（时间序列折线图）
+│   │   │       ├── components/    # 通用 UI 组件（加载/空状态/错误）
+│   │   │       └── models/        # 通用类型定义与常量
+│   │   └── environments/          # 环境配置（接口地址等）
+│   ├── angular.json
 │   └── package.json
+├── development.md                  # 详细设计与开发实施手册
+├── requirement.md                  # 需求规格与技术设计文档
 └── README.md
 ```
 
