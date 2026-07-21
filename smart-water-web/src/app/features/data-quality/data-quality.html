@@ -1,0 +1,217 @@
+<!-- ============ 第一行：KPI 指标卡片 ============ -->
+<nz-row [nzGutter]="16" class="kpi-row">
+  <nz-col [nzSpan]="6" *ngFor="let item of kpiList">
+    <nz-card class="kpi-card">
+      <div class="kpi-title">{{ item.title }}</div>
+      <div class="kpi-value" [style.color]="item.color">
+        {{ item.value }}
+        <span class="kpi-unit">{{ item.unit }}</span>
+      </div>
+    </nz-card>
+  </nz-col>
+</nz-row>
+
+<!-- ============ 第二行：质量评分趋势 + 维度统计 ============ -->
+<nz-row [nzGutter]="16" class="chart-row">
+  <nz-col [nzSpan]="15">
+    <nz-card class="chart-card" nzTitle="质量评分趋势（近7天）">
+      <div #trendChart class="chart-container"></div>
+    </nz-card>
+  </nz-col>
+  <nz-col [nzSpan]="9">
+    <nz-card class="chart-card" nzTitle="质量维度统计">
+      <div #dimensionChart class="chart-container"></div>
+    </nz-card>
+  </nz-col>
+</nz-row>
+
+<!-- ============ 第三行：搜索筛选栏 + 运行分析 ============ -->
+<nz-card class="filter-card">
+  <div class="filter-bar">
+    <!-- 关键字搜索 -->
+    <nz-input-group nzPrefixIcon="search" style="width: 220px;">
+      <input type="text" nz-input placeholder="点位编号 / 名称"
+             [(ngModel)]="queryParams.keyword"
+             (keyup.enter)="onSearch()" />
+    </nz-input-group>
+
+    <!-- 质量类型筛选 -->
+    <nz-select style="width: 150px; margin-left: 12px;"
+               nzPlaceHolder="质量类型"
+               [(ngModel)]="queryParams.qualityType"
+               nzAllowClear>
+      <nz-option *ngFor="let opt of typeOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
+    </nz-select>
+
+    <!-- 质量等级筛选 -->
+    <nz-select style="width: 130px; margin-left: 12px;"
+               nzPlaceHolder="质量等级"
+               [(ngModel)]="queryParams.level"
+               nzAllowClear>
+      <nz-option *ngFor="let opt of levelOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
+    </nz-select>
+
+    <!-- 查询 / 重置 -->
+    <button nz-button nzType="primary" style="margin-left: 12px;" (click)="onSearch()">
+      <span nz-icon nzType="search"></span>查询
+    </button>
+    <button nz-button style="margin-left: 8px;" (click)="onReset()">
+      <span nz-icon nzType="reload"></span>重置
+    </button>
+
+    <!-- 右侧：运行分析按钮 -->
+    <button nz-button nzType="primary" style="margin-left: auto;"
+            [nzLoading]="isAnalyzing"
+            (click)="onRunAnalysis()">
+      <span nz-icon nzType="thunderbolt"></span>运行分析
+    </button>
+  </div>
+</nz-card>
+
+<!-- ============ 第四行：质量检测结果表格 ============ -->
+<nz-card class="table-card" nzTitle="质量检测结果">
+  <!-- 状态1：加载中 -->
+  <nz-spin *ngIf="loading" nzTip="数据加载中，请稍候" class="state-spin">
+    <div style="height: 200px;"></div>
+  </nz-spin>
+
+  <!-- 状态3：异常错误 -->
+  <div *ngIf="errorMsg && !loading" class="state-error">
+    <span nz-icon nzType="close-circle" class="error-icon"></span>
+    <span class="error-text">{{ errorMsg }}</span>
+    <button nz-button nzType="primary" nzSize="small" (click)="loadResults()" style="margin-left: 12px;">
+      重新查询
+    </button>
+  </div>
+
+  <!-- 正常表格 -->
+  <ng-container *ngIf="!loading && !errorMsg">
+    <nz-table
+      #table
+      [nzData]="tableList"
+      [nzFrontPagination]="false"
+      [nzTotal]="total"
+      [nzPageIndex]="queryParams.pageIndex"
+      [nzPageSize]="queryParams.pageSize"
+      [nzPageSizeOptions]="pageSizeOptions"
+      (nzPageIndexChange)="onPageIndexChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      nzSize="middle"
+      [nzScroll]="{ x: '1300px' }">
+      <thead>
+        <tr>
+          <th>点位编号</th>
+          <th>点位名称</th>
+          <th>监测指标</th>
+          <th>质量类型</th>
+          <th nzAlign="center">质量评分</th>
+          <th nzAlign="center">质量等级</th>
+          <th nzAlign="center">异常条数</th>
+          <th>检测窗口</th>
+          <th>检测时间</th>
+          <th nzAlign="center" nzRight>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="tableList.length > 0; else emptyTpl">
+          <tr *ngFor="let item of tableList">
+            <td>{{ item.pointCode }}</td>
+            <td>{{ item.pointName }}</td>
+            <td>
+              <nz-tag [nzColor]="'blue'">{{ metricText[item.metricCode] || item.metricCode }}</nz-tag>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getTypeTagColor(item.qualityType)">
+                {{ typeText[item.qualityType] || item.qualityType }}
+              </nz-tag>
+            </td>
+            <td nzAlign="center">
+              <span class="score-value" [style.color]="getLevelColor(item.level)">{{ item.score }}</span>
+            </td>
+            <td nzAlign="center">
+              <nz-badge
+                [nzStatus]="item.level === 'excellent' ? 'success' : item.level === 'good' ? 'processing' : item.level === 'warning' ? 'warning' : 'error'"
+                [nzText]="levelText[item.level] || item.level">
+              </nz-badge>
+            </td>
+            <td nzAlign="center">
+              <span [class.abnormal-count]="item.count > 0">{{ item.count }}</span>
+            </td>
+            <td class="window-cell">
+              {{ item.windowStart }}<br/>~ {{ item.windowEnd }}
+            </td>
+            <td>{{ item.detectTime }}</td>
+            <td nzAlign="center" nzRight>
+              <button nz-button nzType="link" nzSize="small" (click)="showDetail(item)">
+                详情
+              </button>
+            </td>
+          </tr>
+        </ng-container>
+
+        <!-- 状态2：空数据 -->
+        <ng-template #emptyTpl>
+          <tr>
+            <td colspan="10">
+              <nz-empty nzDescription="暂无质量检测结果" class="state-empty"></nz-empty>
+            </td>
+          </tr>
+        </ng-template>
+      </tbody>
+    </nz-table>
+  </ng-container>
+</nz-card>
+
+<!-- ============ 第五行：缺失热力图 ============ -->
+<nz-card class="chart-card heatmap-card" nzTitle="数据缺失热力图（点位 × 小时）">
+  <div #heatmapChart class="heatmap-container"></div>
+</nz-card>
+
+<!-- ============ 详情弹窗 ============ -->
+<nz-modal
+  [(nzVisible)]="detailVisible"
+  nzTitle="质量检测结果详情"
+  [nzWidth]="640"
+  [nzFooter]="null"
+  (nzOnCancel)="closeDetail()">
+  <ng-container *nzModalContent>
+    <nz-descriptions *ngIf="detailItem" nzBordered [nzColumn]="2" nzSize="small">
+      <nz-descriptions-item nzSpan="2" nzTitle="点位">
+        {{ detailItem.pointCode }} - {{ detailItem.pointName }}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="监测指标">
+        {{ metricText[detailItem.metricCode] || detailItem.metricCode }}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="质量类型">
+        <nz-tag [nzColor]="getTypeTagColor(detailItem.qualityType)">
+          {{ typeText[detailItem.qualityType] || detailItem.qualityType }}
+        </nz-tag>
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="质量评分">
+        <span [style.color]="getLevelColor(detailItem.level)" style="font-size: 20px; font-weight: 600;">
+          {{ detailItem.score }} 分
+        </span>
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="质量等级">
+        <nz-badge
+          [nzStatus]="detailItem.level === 'excellent' ? 'success' : detailItem.level === 'good' ? 'processing' : detailItem.level === 'warning' ? 'warning' : 'error'"
+          [nzText]="levelText[detailItem.level] || detailItem.level">
+        </nz-badge>
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="异常条数">
+        <span [style.color]="detailItem.count > 0 ? '#f5222d' : '#52c41a'" style="font-weight: 600;">
+          {{ detailItem.count }} 条
+        </span>
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="检测时间">
+        {{ detailItem.detectTime }}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzSpan="2" nzTitle="检测窗口">
+        {{ detailItem.windowStart }} ~ {{ detailItem.windowEnd }}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzSpan="2" nzTitle="详情描述">
+        {{ detailItem.detail }}
+      </nz-descriptions-item>
+    </nz-descriptions>
+  </ng-container>
+</nz-modal>

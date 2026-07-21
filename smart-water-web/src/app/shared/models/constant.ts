@@ -107,3 +107,104 @@ export const THEME_COLOR = {
   PURPLE: '#722ed1',
   ORANGE: '#fa8c16'
 } as const;
+
+/* ============ 数据质量检测类型 ============ */
+export const QUALITY_TYPE = {
+  MISSING: 'missing',           // 缺失
+  DUPLICATE: 'duplicate',       // 重复
+  OUTLIER: 'outlier',           // 离群
+  FREEZE: 'freeze',             // 冻结
+  DRIFT: 'drift',               // 漂移
+  NEGATIVE_FLOW: 'negative_flow',     // 负流量
+  PRESSURE_OOR: 'pressure_oor',       // 压力越界
+  JUMP: 'jump'                  // 跳变
+} as const;
+
+export const QUALITY_TYPE_TEXT: Record<string, string> = {
+  [QUALITY_TYPE.MISSING]: '数据缺失',
+  [QUALITY_TYPE.DUPLICATE]: '数据重复',
+  [QUALITY_TYPE.OUTLIER]: '离群异常',
+  [QUALITY_TYPE.FREEZE]: '数据冻结',
+  [QUALITY_TYPE.DRIFT]: '数据漂移',
+  [QUALITY_TYPE.NEGATIVE_FLOW]: '负流量',
+  [QUALITY_TYPE.PRESSURE_OOR]: '压力越界',
+  [QUALITY_TYPE.JUMP]: '数值跳变'
+};
+
+/* 质量类型下拉选项 */
+export const QUALITY_TYPE_OPTIONS = Object.keys(QUALITY_TYPE_TEXT).map(value => ({
+  label: QUALITY_TYPE_TEXT[value],
+  value
+}));
+
+/* 质量类型对应标签颜色 */
+export const QUALITY_TYPE_TAG_COLOR: Record<string, string> = {
+  [QUALITY_TYPE.MISSING]: 'orange',
+  [QUALITY_TYPE.DUPLICATE]: 'blue',
+  [QUALITY_TYPE.OUTLIER]: 'red',
+  [QUALITY_TYPE.FREEZE]: 'purple',
+  [QUALITY_TYPE.DRIFT]: 'cyan',
+  [QUALITY_TYPE.NEGATIVE_FLOW]: 'red',
+  [QUALITY_TYPE.PRESSURE_OOR]: 'magenta',
+  [QUALITY_TYPE.JUMP]: 'gold'
+};
+
+/* ============ 数据质量等级 ============ */
+export const QUALITY_LEVEL = {
+  EXCELLENT: 'excellent',  // 优秀 >=90
+  GOOD: 'good',            // 良好 80-89
+  WARNING: 'warning',      // 预警 60-79
+  POOR: 'poor'             // 差 <60
+} as const;
+
+export const QUALITY_LEVEL_TEXT: Record<string, string> = {
+  [QUALITY_LEVEL.EXCELLENT]: '优秀',
+  [QUALITY_LEVEL.GOOD]: '良好',
+  [QUALITY_LEVEL.WARNING]: '预警',
+  [QUALITY_LEVEL.POOR]: '差'
+};
+
+/* 质量等级对应颜色：正常#52c41a绿、预警#faad14黄、高危#f5222d红 */
+export const QUALITY_LEVEL_COLOR: Record<string, string> = {
+  [QUALITY_LEVEL.EXCELLENT]: '#52c41a',
+  [QUALITY_LEVEL.GOOD]: '#1677ff',
+  [QUALITY_LEVEL.WARNING]: '#faad14',
+  [QUALITY_LEVEL.POOR]: '#f5222d'
+};
+
+/* 质量等级下拉选项 */
+export const QUALITY_LEVEL_OPTIONS = Object.keys(QUALITY_LEVEL_TEXT).map(value => ({
+  label: QUALITY_LEVEL_TEXT[value],
+  value
+}));
+
+/* 根据Qscore获取质量等级 */
+export function getQualityLevel(score: number): string {
+  if (score >= 90) return QUALITY_LEVEL.EXCELLENT;
+  if (score >= 80) return QUALITY_LEVEL.GOOD;
+  if (score >= 60) return QUALITY_LEVEL.WARNING;
+  return QUALITY_LEVEL.POOR;
+}
+
+/* ============ 分析任务状态 ============ */
+export const TASK_STATUS = {
+  PENDING: 'pending',
+  RUNNING: 'running',
+  SUCCESS: 'success',
+  FAILED: 'failed'
+} as const;
+
+export const TASK_STATUS_TEXT: Record<string, string> = {
+  [TASK_STATUS.PENDING]: '等待中',
+  [TASK_STATUS.RUNNING]: '分析中',
+  [TASK_STATUS.SUCCESS]: '已完成',
+  [TASK_STATUS.FAILED]: '失败'
+};
+
+/* ============ 监测指标类型 ============ */
+export const METRIC_CODE_TEXT: Record<string, string> = {
+  flow: '流量',
+  pressure: '压力',
+  volume: '累计水量',
+  quality: '水质'
+};

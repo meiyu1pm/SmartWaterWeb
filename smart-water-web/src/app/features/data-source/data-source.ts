@@ -11,13 +11,13 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzMessageService } from 'ng-zorro-antd/message';
 
 import { DataSourceService, DataSourceKpiItem, DataSourceItem, DataSourceFormValue } from './data-source.service';
 import {
@@ -60,6 +60,7 @@ import {
   styleUrl: './data-source.scss'
 })
 export class DataSource implements OnInit {
+  /* 常量暴露给模板 */
   readonly typeText = DATA_SOURCE_TYPE_TEXT;
   readonly typeOptions = DATA_SOURCE_TYPE_OPTIONS;
   readonly statusText = DATA_SOURCE_STATUS_TEXT;
@@ -69,12 +70,16 @@ export class DataSource implements OnInit {
   readonly protocolText = DATA_PROTOCOL_TEXT;
   readonly pageSizeOptions = PAGE_SIZE_OPTIONS;
 
+  /* KPI 数据 */
   kpiList: DataSourceKpiItem[] = [];
+
+  /* 表格数据 */
   tableList: DataSourceItem[] = [];
   total = 0;
   loading = false;
   errorMsg = '';
 
+  /* 查询参数 */
   queryParams = {
     keyword: '',
     sourceType: '',
@@ -83,12 +88,14 @@ export class DataSource implements OnInit {
     pageSize: PAGE_SIZE
   };
 
+  /* 弹窗 & 表单 */
   isModalVisible = false;
   isModalLoading = false;
   modalTitle = '新增数据源';
   isEditMode = false;
   form!: FormGroup;
 
+  /* 测试连接状态 */
   testingId: number | null = null;
 
   constructor(
@@ -103,6 +110,7 @@ export class DataSource implements OnInit {
     this.loadList();
   }
 
+  /* ============ 表单初始化 ============ */
   private initForm(): void {
     this.form = this.fb.group({
       id: [null],
@@ -118,10 +126,16 @@ export class DataSource implements OnInit {
     });
   }
 
+  /* ============ 数据加载 ============ */
   loadKpi(): void {
-    this.dataSourceService.getKpi().subscribe(res => {
-      if (res.code === 0) {
-        this.kpiList = res.data;
+    this.dataSourceService.getKpi().subscribe({
+      next: res => {
+        if (res.code === 0) {
+          this.kpiList = res.data;
+        }
+      },
+      error: err => {
+        console.error('KPI加载失败', err);
       }
     });
   }
@@ -129,6 +143,7 @@ export class DataSource implements OnInit {
   loadList(): void {
     this.loading = true;
     this.errorMsg = '';
+
     this.dataSourceService.getPageList(this.queryParams).subscribe({
       next: res => {
         this.loading = false;
@@ -139,13 +154,15 @@ export class DataSource implements OnInit {
           this.errorMsg = res.message || '查询失败';
         }
       },
-      error: () => {
+      error: err => {
         this.loading = false;
-        this.errorMsg = '网络异常，请稍后重试';
+        this.errorMsg = '网络异常，请检查后端服务是否启动';
+        console.error('数据源列表加载失败', err);
       }
     });
   }
 
+  /* ============ 查询/重置 ============ */
   onSearch(): void {
     this.queryParams.pageIndex = 1;
     this.loadList();
@@ -159,6 +176,7 @@ export class DataSource implements OnInit {
     this.loadList();
   }
 
+  /* ============ 分页 ============ */
   onPageIndexChange(index: number): void {
     this.queryParams.pageIndex = index;
     this.loadList();
@@ -170,6 +188,7 @@ export class DataSource implements OnInit {
     this.loadList();
   }
 
+  /* ============ 新增/编辑 ============ */
   openCreateModal(): void {
     this.isEditMode = false;
     this.modalTitle = '新增数据源';
@@ -205,6 +224,7 @@ export class DataSource implements OnInit {
   }
 
   handleOk(): void {
+    // 校验所有字段
     Object.values(this.form.controls).forEach(ctrl => {
       if (ctrl.invalid) {
         ctrl.markAsDirty();
@@ -218,6 +238,7 @@ export class DataSource implements OnInit {
 
     this.isModalLoading = true;
     const formValue: DataSourceFormValue = this.form.value;
+
     const api$ = this.isEditMode
       ? this.dataSourceService.update(formValue)
       : this.dataSourceService.create(formValue);
@@ -227,25 +248,39 @@ export class DataSource implements OnInit {
         this.isModalLoading = false;
         if (res.code === 0) {
           this.isModalVisible = false;
+          this.message.success(this.isEditMode ? '编辑成功' : '新增成功');
+          this.loadKpi();
+          this.loadList();
+        } else {
+          this.message.error(res.message || '保存失败');
+        }
+      },
+      error: err => {
+        this.isModalLoading = false;
+        this.message.error('网络异常，保存失败');
+        console.error('保存失败', err);
+      }
+    });
+  }
+
+  /* ============ 删除 ============ */
+  onDelete(item: DataSourceItem): void {
+    this.dataSourceService.delete(item.id).subscribe({
+      next: res => {
+        if (res.code === 0) {
+          this.message.success('删除成功');
           this.loadKpi();
           this.loadList();
         }
       },
-      error: () => {
-        this.isModalLoading = false;
+      error: err => {
+        this.message.error('删除失败');
+        console.error('删除失败', err);
       }
     });
   }
 
-  onDelete(item: DataSourceItem): void {
-    this.dataSourceService.delete(item.id).subscribe(res => {
-      if (res.code === 0) {
-        this.loadKpi();
-        this.loadList();
-      }
-    });
-  }
-
+  /* ============ 测试连接 ============ */
   onTestConnection(item: DataSourceItem): void {
     this.testingId = item.id;
     this.dataSourceService.testConnection(item.id).subscribe({
@@ -265,16 +300,34 @@ export class DataSource implements OnInit {
     });
   }
 
+  /* ============ 启停 ============ */
   onToggleStatus(item: DataSourceItem, checked: boolean): void {
     const status = checked ? 'online' : 'offline';
-    this.dataSourceService.toggleStatus(item.id, status).subscribe(res => {
-      if (res.code === 0) {
-        this.loadKpi();
-        this.loadList();
+    this.dataSourceService.toggleStatus(item.id, status).subscribe({
+      next: res => {
+        if (res.code === 0) {
+          this.message.success(`已${checked ? '启用' : '停用'}：${item.sourceName}`);
+          this.loadKpi();
+          this.loadList();
+        }
+      },
+      error: err => {
+        // 失败时回滚开关状态
+        item.status = checked ? 'offline' : 'online';
+        this.message.error('操作失败，请重试');
+        console.error('启停失败', err);
       }
     });
   }
 
+  /* ============ 辅助方法 ============ */
+
+  /** 获取状态标签颜色 */
+  getStatusTagColor(status: string): string {
+    return this.statusColor[status] || '#d9d9d9';
+  }
+
+  /** 判断端口是否需要显示 */
   hasPort(item: DataSourceItem): boolean {
     return item.port !== null && item.port !== undefined;
   }
