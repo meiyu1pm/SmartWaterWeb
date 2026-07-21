@@ -1,0 +1,129 @@
+/* ============ KPI 指标卡片 ============ */
+.kpi-row {
+  margin-bottom: 16px;
+
+  .kpi-card {
+    border-radius: 8px;
+
+    .kpi-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 600;
+      line-height: 1.2;
+
+      .kpi-unit {
+        font-size: 14px;
+        font-weight: 400;
+        margin-left: 4px;
+        color: #999;
+      }
+    }
+  }
+}
+
+/* ============ 图表卡片 ============ */
+.chart-row {
+  margin-bottom: 16px;
+}
+
+.chart-card {
+  border-radius: 8px;
+  margin-bottom: 16px;
+
+  .chart-container {
+    width: 100%;
+    height: 300px;
+  }
+}
+
+/* ============ 搜索筛选栏 ============ */
+.filter-card {
+  margin-bottom: 16px;
+  border-radius: 8px;
+
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+}
+
+/* ============ 数据表格 ============ */
+.table-card {
+  border-radius: 8px;
+
+  .score-value {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .abnormal-count {
+    color: #f5222d;
+    font-weight: 600;
+  }
+
+  .window-cell {
+    font-size: 12px;
+    color: #999;
+    line-height: 1.6;
+  }
+}
+
+/* ============ 热力图 ============ */
+.heatmap-card {
+  .heatmap-container {
+    width: 100%;
+    height: 360px;
+  }
+}
+
+/* ============ 4种状态样式 ============ */
+
+/* 加载中 */
+.state-spin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+
+  ::ng-deep .ant-spin {
+    max-height: initial;
+  }
+}
+
+/* 空数据 */
+.state-empty {
+  padding: 40px 0;
+}
+
+/* 异常错误 */
+.state-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+
+  .error-icon {
+    font-size: 20px;
+    color: #f5222d;
+    margin-right: 8px;
+  }
+
+  .error-text {
+    font-size: 14px;
+    color: #f5222d;
+  }
+}
+
+/* ============ 表格内操作按钮间距 ============ */
+::ng-deep .ant-table-tbody > tr > td {
+  .ant-btn-link {
+    padding: 0 4px;
+  }
+}
