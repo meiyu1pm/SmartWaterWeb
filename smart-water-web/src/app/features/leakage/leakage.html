@@ -1,85 +1,100 @@
-<!-- 顶部筛选栏 -->
-<div class="filter-bar">
-  <nz-select style="width: 200px;" nzPlaceHolder="选择分区/DMA">
-    <nz-option nzLabel="全部分区" nzValue="all"></nz-option>
-    <nz-option nzLabel="经开6分区" nzValue="area1"></nz-option>
-    <nz-option nzLabel="纬二路片区" nzValue="area2"></nz-option>
-  </nz-select>
+<app-loading *ngIf="loading" tip="数据加载中，请稍候"></app-loading>
 
-  <nz-range-picker style="margin-left: 16px;"></nz-range-picker>
+<app-error-state
+  *ngIf="!loading && errorMsg"
+  [message]="errorMsg"
+  (retry)="loadAllData()">
+</app-error-state>
 
-  <button nz-button nzType="primary" style="margin-left: 16px;">运行分析</button>
-  <button nz-button style="margin-left: 8px;">导出报告</button>
-</div>
+<ng-container *ngIf="!loading && !errorMsg">
+  <!-- 顶部筛选栏 -->
+  <div class="filter-bar">
+    <nz-select style="width: 200px;" nzPlaceHolder="选择分区/DMA" [(ngModel)]="areaId">
+      <nz-option nzLabel="全部分区" nzValue="all"></nz-option>
+      <nz-option nzLabel="经开6分区" nzValue="area1"></nz-option>
+      <nz-option nzLabel="纬二路片区" nzValue="area2"></nz-option>
+    </nz-select>
 
-<!-- 第一行：6个KPI指标卡 -->
-<nz-row [nzGutter]="16" class="kpi-row">
-  <nz-col [nzSpan]="4" *ngFor="let item of kpiList">
-    <nz-card class="kpi-card">
-      <div class="kpi-title">{{ item.title }}</div>
-      <div class="kpi-value" [style.color]="item.color">
-        {{ item.value }}
-        <span class="kpi-unit">{{ item.unit }}</span>
-      </div>
-    </nz-card>
-  </nz-col>
-</nz-row>
+    <nz-range-picker style="margin-left: 16px;" [(ngModel)]="dateRange"></nz-range-picker>
 
-<!-- 第二行：左右分栏 -->
-<nz-row [nzGutter]="16" class="content-row">
-  <!-- 左侧：分区风险列表 -->
-  <nz-col [nzSpan]="8">
-    <nz-card nzTitle="分区风险概览" class="content-card">
-      <div class="risk-list">
-        <div class="risk-item" *ngFor="let item of areaRiskData">
-          <span class="risk-name">{{ item.name }}</span>
-          <nz-tag [nzColor]="item.level === 'high' ? '#f5222d' : item.level === 'medium' ? '#faad14' : '#52c41a'">
-            {{ item.level === 'high' ? '高风险' : item.level === 'medium' ? '中风险' : '低风险' }}
-          </nz-tag>
-          <span class="risk-rate">漏损率 {{ item.leakRate }}</span>
+    <button nz-button nzType="primary" style="margin-left: 16px;" (click)="onAnalyze()">运行分析</button>
+    <button nz-button style="margin-left: 8px;" (click)="onExportReport()">导出报告</button>
+  </div>
+
+  <!-- 第一行：6个KPI指标卡 -->
+  <nz-row [nzGutter]="16" class="kpi-row">
+    <nz-col [nzSpan]="4" *ngFor="let item of kpiList">
+      <nz-card>
+        <app-kpi-card
+          [title]="item.title"
+          [value]="item.value"
+          [unit]="item.unit"
+          [color]="item.color">
+        </app-kpi-card>
+      </nz-card>
+    </nz-col>
+  </nz-row>
+
+  <!-- 第二行：左右分栏 -->
+  <nz-row [nzGutter]="16" class="content-row">
+    <!-- 左侧：分区风险列表 -->
+    <nz-col [nzSpan]="8">
+      <nz-card nzTitle="分区风险概览" class="content-card">
+        <app-empty *ngIf="areaRiskData.length === 0" description="暂无风险分区数据"></app-empty>
+        <div class="risk-list" *ngIf="areaRiskData.length > 0">
+          <div class="risk-item" *ngFor="let item of areaRiskData">
+            <span class="risk-name">{{ item.name }}</span>
+            <nz-tag [nzColor]="getRiskLevelColor(item.level)">
+              {{ getRiskLevelText(item.level) }}
+            </nz-tag>
+            <span class="risk-rate">漏损率 {{ item.leakRate }}</span>
+          </div>
         </div>
-      </div>
-    </nz-card>
-  </nz-col>
+      </nz-card>
+    </nz-col>
 
-  <!-- 右侧：流量压力时序曲线（占位，后续接ECharts） -->
-  <nz-col [nzSpan]="16">
-    <nz-card nzTitle="流量/压力历史趋势" class="content-card">
-      <app-time-line-chart [chartData]="flowChartData"></app-time-line-chart>
-    </nz-card>
-  </nz-col>
-</nz-row>
+    <!-- 右侧：流量压力时序曲线（多指标叠加） -->
+    <nz-col [nzSpan]="16">
+      <nz-card nzTitle="流量/压力历史趋势" class="content-card">
+        <app-empty *ngIf="flowPressureSeries.length === 0" description="暂无趋势数据"></app-empty>
+        <app-time-line-chart *ngIf="flowPressureSeries.length > 0" [seriesList]="flowPressureSeries" yAxisName="数值"></app-time-line-chart>
+      </nz-card>
+    </nz-col>
+  </nz-row>
 
-<!-- 第三行：左右分栏 -->
-<nz-row [nzGutter]="16" class="content-row">
-  <!-- 左侧：异常点表格 -->
-  <nz-col [nzSpan]="12">
-    <nz-card nzTitle="漏损异常点列表" class="content-card">
-      <nz-table [nzData]="anomalyTableData" [nzFrontPagination]="false" nzSize="small">
-        <thead>
-          <tr>
-            <th>异常时间</th>
-            <th>监测点位</th>
-            <th>异常分数</th>
-            <th>异常类型</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let data of anomalyTableData">
-            <td>{{ data.time }}</td>
-            <td>{{ data.point }}</td>
-            <td>{{ data.score }}</td>
-            <td>{{ data.type }}</td>
-          </tr>
-        </tbody>
-      </nz-table>
-    </nz-card>
-  </nz-col>
+  <!-- 第三行：左右分栏 -->
+  <nz-row [nzGutter]="16" class="content-row">
+    <!-- 左侧：异常点表格 -->
+    <nz-col [nzSpan]="12">
+      <nz-card nzTitle="漏损异常点列表" class="content-card">
+        <app-empty *ngIf="anomalyTableData.length === 0" description="暂无异常点数据"></app-empty>
+        <nz-table *ngIf="anomalyTableData.length > 0" [nzData]="anomalyTableData" [nzFrontPagination]="false" nzSize="small">
+          <thead>
+            <tr>
+              <th>异常时间</th>
+              <th>监测点位</th>
+              <th>异常分数</th>
+              <th>异常类型</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let data of anomalyTableData">
+              <td>{{ data.time }}</td>
+              <td>{{ data.point }}</td>
+              <td>{{ data.score }}</td>
+              <td>{{ data.type }}</td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </nz-col>
 
-  <!-- 右侧：夜间最小流量图 -->
-  <nz-col [nzSpan]="12">
-    <nz-card nzTitle="夜间最小流量趋势" class="content-card">
-      <app-time-line-chart [chartData]="nightFlowData"></app-time-line-chart>
-    </nz-card>
-  </nz-col>
-</nz-row>
+    <!-- 右侧：夜间最小流量图 -->
+    <nz-col [nzSpan]="12">
+      <nz-card nzTitle="夜间最小流量趋势" class="content-card">
+        <app-empty *ngIf="nightFlowData.length === 0" description="暂无夜间流量数据"></app-empty>
+        <app-time-line-chart *ngIf="nightFlowData.length > 0" [chartData]="nightFlowData" yAxisName="流量(m³/h)" lineColor="#722ed1"></app-time-line-chart>
+      </nz-card>
+    </nz-col>
+  </nz-row>
+</ng-container>

@@ -1,49 +1,101 @@
-<!-- 第一行：全局概览指标 -->
-<nz-row [nzGutter]="16" class="kpi-row">
-  <nz-col [nzSpan]="6" *ngFor="let item of overviewKpi">
-    <nz-card class="overview-card">
-      <div class="card-header">
-        <span class="card-title">{{ item.title }}</span>
-        <span class="card-trend" [style.color]="item.trend.startsWith('+') ? '#f5222d' : '#52c41a'">
-          {{ item.trend }}
-        </span>
-      </div>
-      <div class="card-value" [style.color]="item.color">
-        {{ item.value }}
-        <span class="card-unit">{{ item.unit }}</span>
-      </div>
-    </nz-card>
-  </nz-col>
-</nz-row>
+<app-loading *ngIf="loading" tip="数据加载中，请稍候"></app-loading>
 
-<!-- 第二行：左右分栏 -->
-<nz-row [nzGutter]="16" class="content-row">
-  <!-- 左侧：全局总流量趋势 -->
-  <nz-col [nzSpan]="16">
-    <nz-card nzTitle="全网24小时总流量趋势" class="content-card">
-      <app-time-line-chart
-        yAxisName="流量(m³/h)"
-        [chartData]="totalFlowData"
-        lineColor="#1677ff">
-      </app-time-line-chart>
-    </nz-card>
-  </nz-col>
+<app-error-state
+  *ngIf="!loading && errorMsg"
+  [message]="errorMsg"
+  (retry)="loadAllData()">
+</app-error-state>
 
-  <!-- 右侧：最新告警列表 -->
-  <nz-col [nzSpan]="8">
-    <nz-card nzTitle="最新告警动态" class="content-card">
-      <div class="alarm-list">
-        <div class="alarm-item" *ngFor="let item of latestAlarmList">
-          <div class="alarm-left">
-            <nz-badge [nzStatus]="item.level"></nz-badge>
-            <span class="alarm-content">{{ item.content }}</span>
-          </div>
-          <div class="alarm-right">
-            <span class="alarm-area">{{ item.area }}</span>
-            <span class="alarm-time">{{ item.time }}</span>
+<ng-container *ngIf="!loading && !errorMsg">
+  <!-- 第一行：全局概览指标 -->
+  <nz-row [nzGutter]="16" class="kpi-row">
+    <nz-col [nzSpan]="6" *ngFor="let item of overviewKpi">
+      <nz-card>
+        <app-kpi-card
+          [title]="item.title"
+          [value]="item.value"
+          [unit]="item.unit"
+          [color]="item.color"
+          [trend]="item.trend">
+        </app-kpi-card>
+      </nz-card>
+    </nz-col>
+  </nz-row>
+
+  <!-- 第二行：实时时序监控图 -->
+  <nz-row [nzGutter]="16" class="content-row">
+    <nz-col [nzSpan]="24">
+      <nz-card class="content-card">
+        <ng-template nz-card-extra>
+          <nz-radio-group [(ngModel)]="metricType" (ngModelChange)="onMetricChange($event)">
+            <label nz-radio-button nzValue="flow">流量</label>
+            <label nz-radio-button nzValue="pressure">压力</label>
+          </nz-radio-group>
+        </ng-template>
+        <nz-card-meta nzTitle="实时时序监控图"></nz-card-meta>
+        <app-empty *ngIf="!realtimeData" description="实时数据加载中"></app-empty>
+        <app-time-line-chart
+          *ngIf="realtimeData"
+          [yAxisName]="metricType === 'flow' ? '流量(m³/h)' : '压力(MPa)'"
+          [chartData]="realtimeData.data"
+          [thresholds]="realtimeData.thresholds"
+          [markPoints]="realtimeData.markPoints"
+          lineColor="#1677ff">
+        </app-time-line-chart>
+      </nz-card>
+    </nz-col>
+  </nz-row>
+
+  <!-- 第三行：底部左右分栏 -->
+  <nz-row [nzGutter]="16" class="content-row">
+    <!-- 左侧：实时异常告警列表 -->
+    <nz-col [nzSpan]="12">
+      <nz-card nzTitle="实时异常告警" class="content-card">
+        <app-empty *ngIf="latestAlarmList.length === 0" description="暂无告警数据"></app-empty>
+        <div class="alarm-list" *ngIf="latestAlarmList.length > 0">
+          <div class="alarm-item" *ngFor="let item of latestAlarmList">
+            <div class="alarm-left">
+              <nz-badge [nzStatus]="item.level"></nz-badge>
+              <span class="alarm-content">{{ item.content }}</span>
+            </div>
+            <div class="alarm-right">
+              <span class="alarm-area">{{ item.area }}</span>
+              <span class="alarm-time">{{ item.time }}</span>
+            </div>
           </div>
         </div>
-      </div>
-    </nz-card>
-  </nz-col>
-</nz-row>
+      </nz-card>
+    </nz-col>
+
+    <!-- 右侧：任务运行状态列表 -->
+    <nz-col [nzSpan]="12">
+      <nz-card nzTitle="任务运行状态" class="content-card">
+        <app-empty *ngIf="taskList.length === 0" description="暂无任务数据"></app-empty>
+        <nz-table *ngIf="taskList.length > 0" [nzData]="taskList" [nzFrontPagination]="false" nzSize="small">
+          <thead>
+            <tr>
+              <th>任务名称</th>
+              <th>所属场景</th>
+              <th>状态</th>
+              <th>进度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let task of taskList">
+              <td>{{ task.name }}</td>
+              <td>{{ task.scenario }}</td>
+              <td>
+                <nz-tag [nzColor]="getTaskStatusColor(task.status)">
+                  {{ getTaskStatusText(task.status) }}
+                </nz-tag>
+              </td>
+              <td>
+                <nz-progress [nzPercent]="task.progress" [nzStatus]="task.status === 'failed' ? 'exception' : task.status === 'success' ? 'success' : 'active'" nzSize="small"></nz-progress>
+              </td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </nz-card>
+    </nz-col>
+  </nz-row>
+</ng-container>
