@@ -1,0 +1,158 @@
+<!-- src/app/features/waterlogging/waterlogging.html -->
+<nz-spin [nzSpinning]="loading" nzTip="加载中...">
+  <div class="waterlogging-page">
+    <!-- 顶部筛选栏 -->
+    <div class="filter-bar">
+      <div class="filter-left">
+        <span class="filter-label">区域：</span>
+        <nz-select [(ngModel)]="selectedArea" nzPlaceHolder="选择区域" style="width: 150px;">
+          <nz-option nzValue="all" nzLabel="全部区域"></nz-option>
+          <nz-option nzValue="qiaodong" nzLabel="桥东区"></nz-option>
+          <nz-option nzValue="qiaoxi" nzLabel="桥西区"></nz-option>
+          <nz-option nzValue="yuhua" nzLabel="裕华区"></nz-option>
+          <nz-option nzValue="chang'an" nzLabel="长安区"></nz-option>
+          <nz-option nzValue="xinhua" nzLabel="新华区"></nz-option>
+        </nz-select>
+
+        <span class="filter-label" style="margin-left: 16px;">时间范围：</span>
+        <nz-range-picker [(ngModel)]="selectedTime"></nz-range-picker>
+      </div>
+      <div class="filter-right">
+        <button nz-button (click)="onReset()">
+          <span nz-icon nzType="reload"></span>
+          重置
+        </button>
+        <button nz-button nzType="primary" (click)="onSearch()" style="margin-left: 8px;">
+          <span nz-icon nzType="search"></span>
+          查询
+        </button>
+        <button nz-button (click)="onRefresh()" style="margin-left: 8px;">
+          <span nz-icon nzType="sync"></span>
+          刷新
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI指标卡片 -->
+    <div nz-row [nzGutter]="16" class="kpi-row">
+      <div nz-col [nzSpan]="6" *ngFor="let kpi of kpiList">
+        <nz-card class="kpi-card" [ngStyle]="{'border-left': '4px solid ' + riskColor[kpi.level]}">
+          <div class="kpi-content">
+            <div class="kpi-icon" [ngStyle]="{'background': riskColor[kpi.level] + '20', 'color': riskColor[kpi.level]}">
+              <span nz-icon [nzType]="kpi.icon"></span>
+            </div>
+            <div class="kpi-info">
+              <div class="kpi-title">{{ kpi.title }}</div>
+              <div class="kpi-value" [ngStyle]="{'color': riskColor[kpi.level]}">
+                {{ kpi.value }}<span class="kpi-unit">{{ kpi.unit }}</span>
+              </div>
+            </div>
+          </div>
+        </nz-card>
+      </div>
+    </div>
+
+    <!-- 预警提示横幅 -->
+    <nz-alert
+      *ngIf="alarmList.length > 0"
+      [nzType]="'warning'"
+      [nzMessage]="'当前发布 ' + alarmList.length + ' 条内涝预警，请及时处理'"
+      [nzDescription]="'最高等级：' + alarmText[alarmList[0].level]"
+      nzShowIcon
+      class="alarm-banner"
+    ></nz-alert>
+
+    <!-- 降雨-水位-流量趋势图 -->
+    <nz-card title="24小时降雨-水位-流量趋势" class="chart-card">
+      <div #rainChart class="rain-chart"></div>
+    </nz-card>
+
+    <!-- 第二行：泵闸状态 + 告警列表 -->
+    <div nz-row [nzGutter]="16" style="margin-top: 16px;">
+      <div nz-col [nzSpan]="12">
+        <nz-card title="泵闸运行状态">
+          <nz-list [nzDataSource]="pumpList" [nzRenderItem]="null" nzSize="small">
+            <div *ngFor="let pump of pumpList" class="pump-item">
+              <div class="pump-info">
+                <span nz-icon [nzType]="pump.type === 'pump' ? 'thunderbolt' : 'apartment'" class="pump-icon"></span>
+                <span class="pump-name">{{ pump.name }}</span>
+              </div>
+              <div class="pump-status">
+                <nz-tag [nzColor]="pumpStatusColor[pump.status]">{{ pumpStatusText[pump.status] }}</nz-tag>
+                <span class="pump-detail" *ngIf="pump.status === 'running'">
+                  开度 {{ pump.openDegree }}% · 流量 {{ pump.flow }}m³/h
+                </span>
+              </div>
+            </div>
+
+          </nz-list>
+        </nz-card>
+      </div>
+      <div nz-col [nzSpan]="12">
+        <nz-card title="最新预警">
+          <nz-list [nzDataSource]="alarmList" [nzRenderItem]="null" nzSize="small">
+            <div *ngFor="let alarm of alarmList" class="alarm-item">
+              <div class="alarm-header">
+                <nz-tag [nzColor]="alarmColor[alarm.level]">{{ alarmText[alarm.level] }}</nz-tag>
+                <span class="alarm-title">{{ alarm.title }}</span>
+              </div>
+              <div class="alarm-meta">
+                <span>{{ alarm.area }} · {{ alarm.position }}</span>
+                <span>{{ alarm.publishTime }}</span>
+              </div>
+              <div class="alarm-content">{{ alarm.content }}</div>
+            </div>
+          </nz-list>
+        </nz-card>
+      </div>
+    </div>
+
+    <!-- 第三行：积水点表格 + 调度预案 -->
+    <div nz-row [nzGutter]="16" style="margin-top: 16px;">
+      <div nz-col [nzSpan]="14">
+        <nz-card title="实时积水点监测">
+          <nz-table [nzData]="pondingList" [nzFrontPagination]="false" nzSize="small" [nzShowPagination]="false">
+            <thead>
+              <tr>
+                <th>积水点名称</th>
+                <th>所属区域</th>
+                <th>当前水深</th>
+                <th>警戒水深</th>
+                <th>风险等级</th>
+                <th>更新时间</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let point of pondingList">
+                <td>{{ point.name }}</td>
+                <td>{{ point.area }}</td>
+                <td [ngStyle]="{'color': point.waterLevel > point.warningLevel ? '#f5222d' : '#333', 'font-weight': point.waterLevel > point.warningLevel ? 'bold' : 'normal'}">
+                  {{ point.waterLevel }}cm
+                </td>
+                <td>{{ point.warningLevel }}cm</td>
+                <td>
+                  <nz-tag [nzColor]="riskColor[point.riskLevel]">{{ riskText[point.riskLevel] }}</nz-tag>
+                </td>
+                <td>{{ point.updateTime }}</td>
+              </tr>
+            </tbody>
+          </nz-table>
+        </nz-card>
+      </div>
+      <div nz-col [nzSpan]="10">
+        <nz-card title="调度预案建议" *ngIf="dispatchPlans.length > 0">
+          <div *ngFor="let plan of dispatchPlans">
+            <nz-alert [nzType]="'info'" [nzMessage]="plan.title" nzShowIcon class="plan-alert"></nz-alert>
+            <p style="margin: 12px 0; color: #666;">{{ plan.content }}</p>
+            <ul class="plan-actions">
+              <li *ngFor="let action of plan.suggestAction">
+                <span nz-icon nzType="check-circle" style="color: #52c41a; margin-right: 8px;"></span>
+                {{ action }}
+              </li>
+            </ul>
+          </div>
+        </nz-card>
+      </div>
+    </div>
+  </div>
+</nz-spin>

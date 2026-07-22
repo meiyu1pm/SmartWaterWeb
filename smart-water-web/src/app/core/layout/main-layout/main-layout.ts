@@ -40,6 +40,7 @@ export class MainLayout implements OnInit {
   menuList: { path: string; title: string; icon?: string; disabled?: boolean }[] = [
     { path: '/dashboard', title: '综合驾驶舱', icon: 'dashboard' },
     { path: '/leakage', title: '漏损控制', icon: 'warning' },
+    { path: '/waterlogging', title: '城市内涝', icon: 'cloud-rain' },
     { path: '/data-source', title: '数据源管理', icon: 'database' },
     { path: '/data-quality', title: '数据质量中心', icon: 'check-circle' },
   ];
