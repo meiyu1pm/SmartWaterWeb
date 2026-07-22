@@ -14,12 +14,14 @@
 <!-- ============ 第二行：搜索筛选栏 + 操作按钮 ============ -->
 <nz-card class="filter-card">
   <div class="filter-bar">
+    <!-- 关键字搜索 -->
     <nz-input-group nzPrefixIcon="search" style="width: 240px;">
       <input type="text" nz-input placeholder="数据源编号 / 名称"
              [(ngModel)]="queryParams.keyword"
              (keyup.enter)="onSearch()" />
     </nz-input-group>
 
+    <!-- 类型筛选 -->
     <nz-select style="width: 160px; margin-left: 12px;"
                nzPlaceHolder="数据源类型"
                [(ngModel)]="queryParams.sourceType"
@@ -27,6 +29,7 @@
       <nz-option *ngFor="let opt of typeOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
     </nz-select>
 
+    <!-- 状态筛选 -->
     <nz-select style="width: 140px; margin-left: 12px;"
                nzPlaceHolder="状态"
                [(ngModel)]="queryParams.status"
@@ -34,6 +37,7 @@
       <nz-option *ngFor="let opt of statusOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
     </nz-select>
 
+    <!-- 查询 / 重置 -->
     <button nz-button nzType="primary" style="margin-left: 12px;" (click)="onSearch()">
       <span nz-icon nzType="search"></span>查询
     </button>
@@ -41,6 +45,7 @@
       <span nz-icon nzType="reload"></span>重置
     </button>
 
+    <!-- 右侧：新增按钮 -->
     <button nz-button nzType="primary" style="margin-left: auto;" (click)="openCreateModal()">
       <span nz-icon nzType="plus"></span>新增数据源
     </button>
@@ -49,10 +54,12 @@
 
 <!-- ============ 第三行：数据源表格 ============ -->
 <nz-card class="table-card">
+  <!-- 状态1：加载中 -->
   <nz-spin *ngIf="loading" nzTip="数据加载中，请稍候" class="state-spin">
     <div style="height: 200px;"></div>
   </nz-spin>
 
+  <!-- 状态3：异常错误 -->
   <div *ngIf="errorMsg && !loading" class="state-error">
     <span nz-icon nzType="close-circle" class="error-icon"></span>
     <span class="error-text">{{ errorMsg }}</span>
@@ -61,6 +68,7 @@
     </button>
   </div>
 
+  <!-- 正常表格 -->
   <ng-container *ngIf="!loading && !errorMsg">
     <nz-table
       #table
@@ -118,14 +126,17 @@
               </nz-switch>
             </td>
             <td nzAlign="center" nzRight>
+              <!-- 测试连接 -->
               <button nz-button nzType="link" nzSize="small"
                       [nzLoading]="testingId === item.id"
                       (click)="onTestConnection(item)">
                 测试
               </button>
+              <!-- 编辑 -->
               <button nz-button nzType="link" nzSize="small" (click)="openEditModal(item)">
                 编辑
               </button>
+              <!-- 删除 -->
               <button nz-button nzDanger nzType="link" nzSize="small"
                       nz-popconfirm
                       nzPopconfirmTitle="确定删除该数据源吗？删除后不可恢复。"
@@ -135,6 +146,8 @@
             </td>
           </tr>
         </ng-container>
+
+        <!-- 状态2：空数据 -->
         <ng-template #emptyTpl>
           <tr>
             <td colspan="11">
@@ -157,6 +170,8 @@
   (nzOnOk)="handleOk()">
   <ng-container *nzModalContent>
     <form nz-form [formGroup]="form" nzLayout="horizontal">
+
+      <!-- 数据源编号 -->
       <nz-form-item>
         <nz-form-label [nzSpan]="6" nzRequired nzFor="sourceCode">数据源编号</nz-form-label>
         <nz-form-control [nzSpan]="16" nzErrorTip="请输入英文/数字/下划线组合">
@@ -164,6 +179,7 @@
         </nz-form-control>
       </nz-form-item>
 
+      <!-- 数据源名称 -->
       <nz-form-item>
         <nz-form-label [nzSpan]="6" nzRequired nzFor="sourceName">数据源名称</nz-form-label>
         <nz-form-control [nzSpan]="16" nzErrorTip="请输入名称（最多50字）">
@@ -171,6 +187,7 @@
         </nz-form-control>
       </nz-form-item>
 
+      <!-- 类型 + 协议 -->
       <nz-form-item>
         <nz-form-label [nzSpan]="6" nzRequired>数据源类型</nz-form-label>
         <nz-form-control [nzSpan]="7" nzErrorTip="请选择类型">
@@ -186,6 +203,7 @@
         </nz-form-control>
       </nz-form-item>
 
+      <!-- 连接地址 + 端口 -->
       <nz-form-item>
         <nz-form-label [nzSpan]="6" nzRequired nzFor="endpoint">连接地址</nz-form-label>
         <nz-form-control [nzSpan]="12" nzErrorTip="请输入连接地址">
@@ -197,6 +215,7 @@
         </nz-form-control>
       </nz-form-item>
 
+      <!-- 采集频率 + 所属组织 -->
       <nz-form-item>
         <nz-form-label [nzSpan]="6" nzRequired nzFor="collectInterval">采集频率</nz-form-label>
         <nz-form-control [nzSpan]="7" nzErrorTip="请输入采集频率">
@@ -208,6 +227,7 @@
         </nz-form-control>
       </nz-form-item>
 
+      <!-- 备注 -->
       <nz-form-item>
         <nz-form-label [nzSpan]="6" nzFor="remark">备注</nz-form-label>
         <nz-form-control [nzSpan]="16" nzErrorTip="备注最多200字">

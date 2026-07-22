@@ -3,6 +3,7 @@ import { MainLayout } from './core/layout/main-layout/main-layout';
 import { Dashboard } from './features/dashboard/dashboard';
 import { Leakage } from './features/leakage/leakage';
 import { DataSource } from './features/data-source/data-source';
+import { DataQuality } from './features/data-quality/data-quality';
 import { LoginComponent } from './core/auth/login.component';
 import { authGuard } from './core/auth/auth.guard';
 
@@ -23,6 +24,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: Dashboard, title: '综合驾驶舱' },
       { path: 'leakage', component: Leakage, title: '漏损控制' },
       { path: 'data-source', component: DataSource, title: '数据源管理' },
+      { path: 'data-quality', component: DataQuality, title: '数据质量中心' },
     ]
   }
 ];
