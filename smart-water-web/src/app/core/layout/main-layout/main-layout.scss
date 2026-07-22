@@ -1,50 +1,83 @@
-.full-layout {
+// src/app/core/layout/main-layout/main-layout.scss
+.main-layout {
   height: 100vh;
-  width: 100vw;
-  overflow: hidden;
 }
 
-.logo {
-  height: 64px;
-  line-height: 64px;
-  text-align: center;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.1);
+.sidebar {
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+
+  .logo {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.1);
+    letter-spacing: 2px;
+  }
+
+  ::ng-deep .ant-menu-dark .ant-menu-item-selected {
+    background-color: #1890ff !important;
+  }
 }
 
 .header {
-  background: #fff;
   padding: 0 24px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  z-index: 9;
+
+  .header-left {
+    .collapse-btn {
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0 12px;
+      transition: color 0.3s;
+
+      &:hover {
+        color: #1890ff;
+      }
+    }
+  }
+
+  .header-right {
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 0 12px;
+      height: 64px;
+      transition: background 0.3s;
+
+      &:hover {
+        background: #f5f5f5;
+      }
+
+      .username {
+        font-size: 14px;
+        color: #333;
+      }
+    }
+  }
+}
+
+.breadcrumb-bar {
+  padding: 12px 24px;
+  background: #fff;
   border-bottom: 1px solid #f0f0f0;
-
-  .header-title {
-    font-size: 16px;
-    font-weight: 500;
-  }
-
-  .header-user {
-    color: #666;
-    font-size: 14px;
-  }
 }
 
 .content {
-  margin: 16px;
-  padding: 24px;
+  margin: 24px;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 4px;
+  min-height: calc(100vh - 160px);
   overflow: auto;
-}
-
-.logo-img {
-  /* 三个值依次为：最小高度、随视口变化的首选高度、最大高度 */
-  height: clamp(24px, 3vw, 48px);
-  width: auto;
-  display: inline-block;
-  vertical-align: middle;
 }
