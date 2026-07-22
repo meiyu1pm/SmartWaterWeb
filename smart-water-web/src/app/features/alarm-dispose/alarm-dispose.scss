@@ -1,0 +1,46 @@
+.kpi-row {
+  margin-bottom: 16px;
+}
+
+.filter-card {
+  margin-bottom: 16px;
+
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+.table-card {
+  .timeline-item {
+    .timeline-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+
+      .action {
+        font-weight: 500;
+      }
+
+      .operator {
+        color: #666;
+        font-size: 13px;
+      }
+
+      .time {
+        color: #999;
+        font-size: 12px;
+        margin-left: auto;
+      }
+    }
+
+    .remark {
+      color: #666;
+      font-size: 13px;
+      padding-left: 4px;
+    }
+  }
+}

@@ -10,6 +10,7 @@ from app.modules.data_quality.router import router as data_quality_router
 from app.modules.waterlogging.router import router as waterlogging_router
 from app.modules.algorithm.router import router as algorithm_router
 from app.modules.task.router import router as task_router
+from app.modules.alarm.router import router as alarm_router
 
 
 def create_app() -> FastAPI:
@@ -31,7 +32,8 @@ def create_app() -> FastAPI:
     app.include_router(waterlogging_router, prefix=f"{settings.API_V1_STR}/waterlogging", tags=["水位日志"])
     app.include_router(waterlogging_router, prefix=f"{settings.API_V1_STR}/waterlogging", tags=["城市内涝"])
     app.include_router(algorithm_router, prefix=f"{settings.API_V1_STR}/algorithms", tags=["算法管理"])
-    app.include_router(task_router, prefix=f"{settings.API_V1_STR}", tags=["任务中心"])
+    app.include_router(task_router, prefix=f"{settings.API_V1_STR}/tasks", tags=["任务中心"])
+    app.include_router(alarm_router, prefix=f"{settings.API_V1_STR}/alarms", tags=["告警处置"])
 
     @app.get("/")
     def root():
