@@ -1,47 +1,71 @@
-// src/app/features/alarm-dispose/alarm.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../shared/models/api-response';
 import { environment } from '../../../environments/environment';
 
-// ============ 类型定义 ============
-export interface AlarmKpi {
+/* ============ 数据类型定义 ============ */
+/** 告警KPI指标 */
+export interface AlarmKpiItem {
   title: string;
   value: string;
   unit: string;
   color: string;
 }
 
+/** 告警列表项 */
 export interface AlarmItem {
   id: number;
   alarmNo: string;
   title: string;
-  type: 'leakage' | 'waterlogging' | 'quality' | 'device';
-  level: 'blue' | 'yellow' | 'orange' | 'red';
+  type: string;
+  level: string;
   source: string;
   location: string;
   description: string;
-  status: 'pending' | 'processing' | 'handled' | 'closed';
-  handler?: string;
+  status: string;
+  handler: string | null;
   createTime: string;
   updateTime: string;
 }
 
-export interface DisposeRecord {
+/** 处置记录 */
+export interface AlarmDisposeRecord {
   id: number;
   alarmId: number;
-  action: 'confirm' | 'dispatch' | 'process' | 'close';
+  action: string;
   operator: string;
   remark: string;
   createTime: string;
 }
 
+/** 处置请求 */
 export interface DisposeRequest {
-  action: 'confirm' | 'dispatch' | 'process' | 'close';
+  action: string;
   remark?: string;
   handler?: string;
 }
+
+/** 分页结果 */
+export interface PageResult<T> {
+  list: T[];
+  total: number;
+}
+
+/** 查询参数 */
+export interface AlarmQueryParams {
+  keyword?: string;
+  type?: string;
+  level?: string;
+  status?: string;
+  pageIndex: number;
+  pageSize: number;
+}
+
+/** 兼容旧组件导入名 */
+export type AlarmKpi = AlarmKpiItem;
+export type DisposeRecord = AlarmDisposeRecord;
+
 
 @Injectable({ providedIn: 'root' })
 export class AlarmService {
@@ -49,35 +73,66 @@ export class AlarmService {
 
   constructor(private http: HttpClient) {}
 
-  // 获取告警KPI统计
-  getKpi(): Observable<ApiResponse<AlarmKpi[]>> {
-    return this.http.get<ApiResponse<AlarmKpi[]>>(`${this.baseUrl}/kpi`);
+  /* ============ 接口方法 ============ */
+  /**
+   * 获取告警KPI统计
+   * GET /api/v1/alarms/kpi
+   */
+  getKpi(): Observable<ApiResponse<AlarmKpiItem[]>> {
+    return this.http.get<ApiResponse<AlarmKpiItem[]>>(`${this.baseUrl}/kpi`);
   }
 
-  // 获取告警列表（支持筛选分页）
-  getAlarmList(params: {
-    keyword?: string;
-    type?: string;
-    level?: string;
-    status?: string;
-    pageIndex?: number;
-    pageSize?: number;
-  }): Observable<ApiResponse<{ list: AlarmItem[]; total: number }>> {
-    return this.http.get<ApiResponse<{ list: AlarmItem[]; total: number }>>(this.baseUrl, { params });
+  /**
+   * 分页查询告警列表
+   * GET /api/v1/alarms
+   */
+  getList(params: AlarmQueryParams): Observable<ApiResponse<PageResult<AlarmItem>>> {
+    let httpParams = new HttpParams()
+      .set('pageIndex', String(params.pageIndex))
+      .set('pageSize', String(params.pageSize));
+
+    if (params.keyword) httpParams = httpParams.set('keyword', params.keyword);
+    if (params.type) httpParams = httpParams.set('type', params.type);
+    if (params.level) httpParams = httpParams.set('level', params.level);
+    if (params.status) httpParams = httpParams.set('status', params.status);
+
+    return this.http.get<ApiResponse<PageResult<AlarmItem>>>(this.baseUrl, {
+      params: httpParams
+    });
   }
 
-  // 获取告警详情
-  getAlarmDetail(id: number): Observable<ApiResponse<AlarmItem>> {
-    return this.http.get<ApiResponse<AlarmItem>>(`${this.baseUrl}/${id}`);
+  /**
+   * 获取告警详情
+   * GET /api/v1/alarms/{alarm_id}
+   */
+  getDetail(alarmId: number): Observable<ApiResponse<AlarmItem>> {
+    return this.http.get<ApiResponse<AlarmItem>>(`${this.baseUrl}/${alarmId}`);
   }
 
-  // 获取处置记录
-  getDisposeRecords(id: number): Observable<ApiResponse<DisposeRecord[]>> {
-    return this.http.get<ApiResponse<DisposeRecord[]>>(`${this.baseUrl}/${id}/records`);
+  /**
+   * 获取处置记录
+   * GET /api/v1/alarms/{alarm_id}/records
+   */
+  getDisposeRecords(alarmId: number): Observable<ApiResponse<AlarmDisposeRecord[]>> {
+    return this.http.get<ApiResponse<AlarmDisposeRecord[]>>(`${this.baseUrl}/${alarmId}/records`);
   }
 
-  // 处置告警
-  disposeAlarm(id: number, data: DisposeRequest): Observable<ApiResponse<AlarmItem>> {
-    return this.http.post<ApiResponse<AlarmItem>>(`${this.baseUrl}/${id}/dispose`, data);
+  /**
+   * 处置告警
+   * POST /api/v1/alarms/{alarm_id}/dispose
+   */
+  dispose(alarmId: number, req: DisposeRequest): Observable<ApiResponse<AlarmItem>> {
+    return this.http.post<ApiResponse<AlarmItem>>(`${this.baseUrl}/${alarmId}/dispose`, req);
   }
+
+    /** 兼容旧组件调用名 */
+  getAlarmList(params: AlarmQueryParams) {
+    return this.getList(params);
+  }
+
+  disposeAlarm(alarmId: number, req: DisposeRequest) {
+    return this.dispose(alarmId, req);
+  }
+
+
 }

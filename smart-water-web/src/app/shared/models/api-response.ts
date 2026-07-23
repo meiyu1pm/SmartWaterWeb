@@ -8,3 +8,12 @@ export interface ApiResponse<T> {
   data: T;            // 业务数据
   trace_id: string;   // 请求追踪ID
 }
+
+/**
+ * 通用分页结果封装
+ * 所有列表分页接口统一使用
+ */
+export interface PageResult<T> {
+  list: T[];
+  total: number;
+}

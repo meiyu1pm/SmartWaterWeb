@@ -1,3 +1,4 @@
+// src/app/features/data-source/data-source.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -18,7 +19,6 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-
 import { DataSourceService, DataSourceKpiItem, DataSourceItem, DataSourceFormValue } from './data-source.service';
 import {
   DATA_SOURCE_TYPE_TEXT,
@@ -31,6 +31,7 @@ import {
   PAGE_SIZE,
   PAGE_SIZE_OPTIONS
 } from '../../shared/models/constant';
+import { PermissionService } from '../../core/auth/permission.service';
 
 @Component({
   selector: 'app-data-source',
@@ -60,7 +61,6 @@ import {
   styleUrl: './data-source.scss'
 })
 export class DataSource implements OnInit {
-  /* 常量暴露给模板 */
   readonly typeText = DATA_SOURCE_TYPE_TEXT;
   readonly typeOptions = DATA_SOURCE_TYPE_OPTIONS;
   readonly statusText = DATA_SOURCE_STATUS_TEXT;
@@ -70,16 +70,12 @@ export class DataSource implements OnInit {
   readonly protocolText = DATA_PROTOCOL_TEXT;
   readonly pageSizeOptions = PAGE_SIZE_OPTIONS;
 
-  /* KPI 数据 */
   kpiList: DataSourceKpiItem[] = [];
-
-  /* 表格数据 */
   tableList: DataSourceItem[] = [];
   total = 0;
   loading = false;
   errorMsg = '';
 
-  /* 查询参数 */
   queryParams = {
     keyword: '',
     sourceType: '',
@@ -88,20 +84,18 @@ export class DataSource implements OnInit {
     pageSize: PAGE_SIZE
   };
 
-  /* 弹窗 & 表单 */
   isModalVisible = false;
   isModalLoading = false;
   modalTitle = '新增数据源';
   isEditMode = false;
   form!: FormGroup;
-
-  /* 测试连接状态 */
   testingId: number | null = null;
 
   constructor(
     private dataSourceService: DataSourceService,
     private fb: FormBuilder,
-    private message: NzMessageService
+    private message: NzMessageService,
+    protected permissionService: PermissionService
   ) {}
 
   ngOnInit(): void {
@@ -110,7 +104,6 @@ export class DataSource implements OnInit {
     this.loadList();
   }
 
-  /* ============ 表单初始化 ============ */
   private initForm(): void {
     this.form = this.fb.group({
       id: [null],
@@ -126,7 +119,6 @@ export class DataSource implements OnInit {
     });
   }
 
-  /* ============ 数据加载 ============ */
   loadKpi(): void {
     this.dataSourceService.getKpi().subscribe({
       next: res => {
@@ -143,7 +135,6 @@ export class DataSource implements OnInit {
   loadList(): void {
     this.loading = true;
     this.errorMsg = '';
-
     this.dataSourceService.getPageList(this.queryParams).subscribe({
       next: res => {
         this.loading = false;
@@ -162,7 +153,6 @@ export class DataSource implements OnInit {
     });
   }
 
-  /* ============ 查询/重置 ============ */
   onSearch(): void {
     this.queryParams.pageIndex = 1;
     this.loadList();
@@ -176,7 +166,6 @@ export class DataSource implements OnInit {
     this.loadList();
   }
 
-  /* ============ 分页 ============ */
   onPageIndexChange(index: number): void {
     this.queryParams.pageIndex = index;
     this.loadList();
@@ -188,7 +177,6 @@ export class DataSource implements OnInit {
     this.loadList();
   }
 
-  /* ============ 新增/编辑 ============ */
   openCreateModal(): void {
     this.isEditMode = false;
     this.modalTitle = '新增数据源';
@@ -224,25 +212,20 @@ export class DataSource implements OnInit {
   }
 
   handleOk(): void {
-    // 校验所有字段
     Object.values(this.form.controls).forEach(ctrl => {
       if (ctrl.invalid) {
         ctrl.markAsDirty();
         ctrl.updateValueAndValidity({ onlySelf: true });
       }
     });
-
     if (this.form.invalid) {
       return;
     }
-
     this.isModalLoading = true;
     const formValue: DataSourceFormValue = this.form.value;
-
     const api$ = this.isEditMode
       ? this.dataSourceService.update(formValue)
       : this.dataSourceService.create(formValue);
-
     api$.subscribe({
       next: res => {
         this.isModalLoading = false;
@@ -263,7 +246,6 @@ export class DataSource implements OnInit {
     });
   }
 
-  /* ============ 删除 ============ */
   onDelete(item: DataSourceItem): void {
     this.dataSourceService.delete(item.id).subscribe({
       next: res => {
@@ -280,7 +262,6 @@ export class DataSource implements OnInit {
     });
   }
 
-  /* ============ 测试连接 ============ */
   onTestConnection(item: DataSourceItem): void {
     this.testingId = item.id;
     this.dataSourceService.testConnection(item.id).subscribe({
@@ -300,7 +281,6 @@ export class DataSource implements OnInit {
     });
   }
 
-  /* ============ 启停 ============ */
   onToggleStatus(item: DataSourceItem, checked: boolean): void {
     const status = checked ? 'online' : 'offline';
     this.dataSourceService.toggleStatus(item.id, status).subscribe({
@@ -312,7 +292,6 @@ export class DataSource implements OnInit {
         }
       },
       error: err => {
-        // 失败时回滚开关状态
         item.status = checked ? 'offline' : 'online';
         this.message.error('操作失败，请重试');
         console.error('启停失败', err);
@@ -320,14 +299,10 @@ export class DataSource implements OnInit {
     });
   }
 
-  /* ============ 辅助方法 ============ */
-
-  /** 获取状态标签颜色 */
   getStatusTagColor(status: string): string {
     return this.statusColor[status] || '#d9d9d9';
   }
 
-  /** 判断端口是否需要显示 */
   hasPort(item: DataSourceItem): boolean {
     return item.port !== null && item.port !== undefined;
   }

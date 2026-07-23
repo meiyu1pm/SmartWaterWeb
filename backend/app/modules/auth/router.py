@@ -30,6 +30,11 @@ class LoginResponse(BaseModel):
     user: UserInfo
 
 
+# 新增刷新/登出请求模型
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+
 # Mock数据
 mock_admin_user = UserInfo(
     id=1,
@@ -47,8 +52,8 @@ mock_admin_user = UserInfo(
 
 @router.post("/login")
 def login(req: LoginRequest):
-    # Mock登录：任意用户名密码都可以登录，默认返回管理员
-    if req.username and req.password:
+    # 校验账号密码，正确账号：admin / 123456
+    if req.username == "admin" and req.password == "123456":
         return {
             "code": 0,
             "message": "success",
@@ -59,10 +64,11 @@ def login(req: LoginRequest):
             ).model_dump(),
             "trace_id": str(uuid.uuid4())
         }
+    # 账号密码错误，返回401，对齐统一错误格式
     raise HTTPException(status_code=401, detail="Invalid username or password")
 
-@router.post("/refresh") # 刷新token
-def refresh_token(refresh_token: str):
+@router.post("/refresh")
+def refresh_token(req: RefreshTokenRequest):
     return {
         "code": 0,
         "message": "success",
@@ -74,10 +80,10 @@ def refresh_token(refresh_token: str):
         "trace_id": str(uuid.uuid4())
     }
 
-@router.post("/logout") # 退出登录
-def logout(refresh_token: str):
+@router.post("/logout")
+def logout(req: RefreshTokenRequest):
     return {
-        "code": 0,
+        "code": 0, 
         "message": "success",
         "data": {"logged_out": True},
         "trace_id": str(uuid.uuid4())

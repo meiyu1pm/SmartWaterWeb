@@ -10,6 +10,7 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { AuthService } from './auth.service';
 import { NotificationService } from '../notification.service'; // 引入全局通知
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -79,24 +80,24 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (!this.username || !this.password) {
-      this.notify.warning('请输入用户名和密码'); // 使用全局通知
+      this.notify.warning('请输入用户名和密码');
       return;
     }
-
     this.loading = true;
     this.authService.login({
       username: this.username,
       password: this.password,
       remember: this.remember
     }).subscribe({
-      next: () => {
+      next:(res)=>{
         this.loading = false;
         this.notify.success('登录成功'); // 使用全局通知
         this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
+      error:(err: HttpErrorResponse)=>{
         this.loading = false;
-        this.notify.error(err?.message || '登录失败，请检查用户名密码'); // 使用全局通知
+        const errMsg = err.error?.detail || '登录失败，请检查用户名密码';
+        this.notify.error(errMsg);
       }
     });
   }

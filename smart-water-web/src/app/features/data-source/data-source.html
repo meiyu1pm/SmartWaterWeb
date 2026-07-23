@@ -46,7 +46,13 @@
     </button>
 
     <!-- 右侧：新增按钮 -->
-    <button nz-button nzType="primary" style="margin-left: auto;" (click)="openCreateModal()">
+    <button 
+      nz-button 
+      nzType="primary" 
+      style="margin-left: auto;" 
+      (click)="openCreateModal()"
+      *ngIf="permissionService.hasPerm('data_source:write')"
+    >
       <span nz-icon nzType="plus"></span>新增数据源
     </button>
   </div>
@@ -126,21 +132,35 @@
               </nz-switch>
             </td>
             <td nzAlign="center" nzRight>
-              <!-- 测试连接 -->
-              <button nz-button nzType="link" nzSize="small"
-                      [nzLoading]="testingId === item.id"
-                      (click)="onTestConnection(item)">
+              <button 
+                nz-button 
+                nzType="link" 
+                nzSize="small"
+                [nzLoading]="testingId === item.id"
+                (click)="onTestConnection(item)"
+                *ngIf="permissionService.hasPerm('data_source:write')"
+              >
                 测试
               </button>
-              <!-- 编辑 -->
-              <button nz-button nzType="link" nzSize="small" (click)="openEditModal(item)">
+              <button 
+                nz-button 
+                nzType="link" 
+                nzSize="small" 
+                (click)="openEditModal(item)"
+                *ngIf="permissionService.hasPerm('data_source:write')"
+              >
                 编辑
               </button>
-              <!-- 删除 -->
-              <button nz-button nzDanger nzType="link" nzSize="small"
-                      nz-popconfirm
-                      nzPopconfirmTitle="确定删除该数据源吗？删除后不可恢复。"
-                      (nzOnConfirm)="onDelete(item)">
+              <button 
+                nz-button 
+                nzDanger 
+                nzType="link" 
+                nzSize="small"
+                nz-popconfirm
+                nzPopconfirmTitle="确定删除该数据源吗？删除后不可恢复。"
+                (nzOnConfirm)="onDelete(item)"
+                *ngIf="permissionService.hasPerm('data_source:write')"
+              >
                 删除
               </button>
             </td>

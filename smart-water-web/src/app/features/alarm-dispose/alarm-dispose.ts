@@ -15,8 +15,10 @@ import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.comp
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
 import { EmptyComponent } from '../../shared/components/empty/empty.component';
 import { AlarmService, AlarmKpi, AlarmItem, DisposeRecord } from './alarm.service';
-import {NzDescriptionsModule} from 'ng-zorro-antd/descriptions';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ApiResponse, PageResult } from '../../shared/models/api-response';
 
 
 @Component({
@@ -141,7 +143,7 @@ export class AlarmDisposeComponent implements OnInit {
       pageIndex: this.pageIndex,
       pageSize: this.pageSize
     }).subscribe({
-      next: (res) => {
+      next: (res: ApiResponse<PageResult<AlarmItem>>) => {
         console.log('告警列表回调成功，完整响应：', res);
         if (res.code === 0) {
           this.alarmList = res.data.list;
@@ -153,7 +155,7 @@ export class AlarmDisposeComponent implements OnInit {
         this.cdr.detectChanges();
         console.log('loading已设为false，视图已刷新');
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         console.error('加载告警列表失败：', err);
         this.loading = false;
         this.cdr.detectChanges();
@@ -209,7 +211,7 @@ export class AlarmDisposeComponent implements OnInit {
       remark: this.disposeRemark,
       handler: '当前用户'
     }).subscribe({
-      next: res => {
+      next: (res: ApiResponse<AlarmItem>) => {
         console.log('收到告警列表响应：', res);
         if (res.code === 0) {
           const data: any = res.data;
@@ -220,7 +222,7 @@ export class AlarmDisposeComponent implements OnInit {
         this.loading = false;
         console.log('loading当前值：', this.loading);
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.disposeLoading = false;
         this.message.error('处置失败');
       }

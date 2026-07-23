@@ -45,6 +45,10 @@ Thumbs.db
 *.log
 *.tmp
 
+# 启动日志文件夹和启动脚本
+./run_logs/
+*.sh
+
 # === 说明文档 ===
 development.md
 requirements.md

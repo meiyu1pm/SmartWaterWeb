@@ -14,7 +14,7 @@
     <ul nz-menu nzTheme="dark" nzMode="inline">
       <li 
         nz-menu-item 
-        *ngFor="let item of menuList" 
+        *ngFor="let item of visibleMenuList" 
         [routerLink]="item.path"
         routerLinkActive="ant-menu-item-selected"
       >
@@ -43,7 +43,6 @@
           <div class="user-info">
             <nz-avatar nzSize="small" [nzText]="userInfo?.displayName?.charAt(0) || '管'"></nz-avatar>
             <span class="username" *ngIf="!isCollapsed">{{ userInfo?.displayName || '管理员' }}</span>
-            <span nz-icon nzType="down"></span>
           </div>
         </div>
         <nz-dropdown-menu #userMenu>

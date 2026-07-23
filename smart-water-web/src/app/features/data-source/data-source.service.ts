@@ -4,8 +4,8 @@ import { Observable } from 'rxjs';
 import { ApiResponse } from '../../shared/models/api-response';
 import { environment } from '../../../environments/environment';
 
-/* ============ 数据类型定义 ============ */
 
+/* ============ 数据类型定义 ============ */
 /** 数据源KPI指标 */
 export interface DataSourceKpiItem {
   title: string;
@@ -72,7 +72,6 @@ export class DataSourceService {
   constructor(private http: HttpClient) {}
 
   /* ============ 接口方法（全部走后端真实接口） ============ */
-
   /**
    * 获取数据源KPI概览
    * GET /api/v1/data-sources/kpi
@@ -86,22 +85,17 @@ export class DataSourceService {
    * GET /api/v1/data-sources?keyword=&sourceType=&status=&pageIndex=&pageSize=
    * 支持按关键字、类型、状态筛选，后端分页
    */
-  getPageList(params: DataSourceQueryParams): Observable<ApiResponse<PageResult<DataSourceItem>>> {
-    let httpParams = new HttpParams()
-      .set('pageIndex', String(params.pageIndex))
-      .set('pageSize', String(params.pageSize));
-    if (params.keyword) {
-      httpParams = httpParams.set('keyword', params.keyword);
-    }
-    if (params.sourceType) {
-      httpParams = httpParams.set('sourceType', params.sourceType);
-    }
-    if (params.status) {
-      httpParams = httpParams.set('status', params.status);
-    }
-    return this.http.get<ApiResponse<PageResult<DataSourceItem>>>(this.baseUrl, {
-      params: httpParams
-    });
+  getPageList(params: {
+    keyword: string;
+    sourceType: string;
+    status: string;
+    pageIndex: number;
+    pageSize: number;
+  }): Observable<{ code: number; message: string; data: { list: DataSourceItem[]; total: number }; trace_id: string }> {
+    return this.http.get<{ code: number; message: string; data: { list: DataSourceItem[]; total: number }; trace_id: string }>(
+      this.baseUrl,
+      { params }
+    );
   }
 
   /**
@@ -109,8 +103,11 @@ export class DataSourceService {
    * POST /api/v1/data-sources  body: DataSourceFormValue
    * 后端补全 id / status=offline / lastUpdateTime
    */
-  create(formValue: DataSourceFormValue): Observable<ApiResponse<DataSourceItem>> {
-    return this.http.post<ApiResponse<DataSourceItem>>(this.baseUrl, formValue);
+  create(form: DataSourceFormValue): Observable<{ code: number; message: string; data: DataSourceItem; trace_id: string }> {
+    return this.http.post<{ code: number; message: string; data: DataSourceItem; trace_id: string }>(
+      this.baseUrl,
+      form
+    );
   }
 
   /**
@@ -118,33 +115,43 @@ export class DataSourceService {
    * PUT /api/v1/data-sources/{id}  body: DataSourceFormValue
    * 后端保留原 status，更新 lastUpdateTime
    */
-  update(formValue: DataSourceFormValue): Observable<ApiResponse<DataSourceItem>> {
-    const id = formValue.id!;
-    return this.http.put<ApiResponse<DataSourceItem>>(`${this.baseUrl}/${id}`, formValue);
+  update(form: DataSourceFormValue): Observable<{ code: number; message: string; data: DataSourceItem; trace_id: string }> {
+    return this.http.put<{ code: number; message: string; data: DataSourceItem; trace_id: string }>(
+      `${this.baseUrl}/${form.id}`,
+      form
+    );
   }
 
   /**
    * 删除数据源
    * DELETE /api/v1/data-sources/{id}
    */
-  delete(id: number): Observable<ApiResponse<null>> {
-    return this.http.delete<ApiResponse<null>>(`${this.baseUrl}/${id}`);
+  delete(id: number): Observable<{ code: number; message: string; data: null; trace_id: string }> {
+    return this.http.delete<{ code: number; message: string; data: null; trace_id: string }>(
+      `${this.baseUrl}/${id}`
+    );
   }
 
   /**
    * 测试连接
    * POST /api/v1/data-sources/{id}/test
    */
-  testConnection(id: number): Observable<ApiResponse<TestConnectionResult>> {
-    return this.http.post<ApiResponse<TestConnectionResult>>(`${this.baseUrl}/${id}/test`, {});
+  testConnection(id: number): Observable<{ code: number; message: string; data: { success: boolean; message: string }; trace_id: string }> {
+    return this.http.post<{ code: number; message: string; data: { success: boolean; message: string }; trace_id: string }>(
+      `${this.baseUrl}/${id}/test`,
+      {}
+    );
   }
 
   /**
    * 启停数据源
    * POST /api/v1/data-sources/{id}/toggle?status=online|offline
    */
-  toggleStatus(id: number, status: 'online' | 'offline'): Observable<ApiResponse<null>> {
-    const params = new HttpParams().set('status', status);
-    return this.http.post<ApiResponse<null>>(`${this.baseUrl}/${id}/toggle`, {}, { params });
+  toggleStatus(id: number, status: string): Observable<{ code: number; message: string; data: null; trace_id: string }> {
+    return this.http.post<{ code: number; message: string; data: null; trace_id: string }>(
+      `${this.baseUrl}/${id}/toggle`,
+      {},
+      { params: { status } }
+    );
   }
 }

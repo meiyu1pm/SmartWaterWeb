@@ -2,7 +2,6 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } fr
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import * as echarts from 'echarts';
-
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -19,7 +18,6 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
-
 import {
   DataQualityService,
   QualityKpiItem,
@@ -40,6 +38,8 @@ import {
   PAGE_SIZE_OPTIONS,
   getQualityLevel
 } from '../../shared/models/constant';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ApiResponse, PageResult } from '../../shared/models/api-response';
 
 @Component({
   selector: 'app-data-quality',
@@ -160,8 +160,8 @@ export class DataQuality implements OnInit, AfterViewInit, OnDestroy {
     this.loading = true;
     this.errorMsg = '';
 
-    this.qualityService.getResults(this.queryParams).subscribe({
-      next: res => {
+    this.qualityService.getResultList(this.queryParams).subscribe({
+      next: (res: ApiResponse<PageResult<QualityResultItem>>) => {
         this.loading = false;
         if (res.code === 0) {
           this.tableList = res.data.list;
@@ -170,7 +170,7 @@ export class DataQuality implements OnInit, AfterViewInit, OnDestroy {
           this.errorMsg = res.message || '查询失败';
         }
       },
-      error: err => {
+      error: (err: HttpErrorResponse) => {
         this.loading = false;
         this.errorMsg = '网络异常，请检查后端服务是否启动';
         console.error('质量结果加载失败', err);
