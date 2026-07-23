@@ -1,41 +1,64 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { routes } from './app.routes';
-import { en_US, provideNzI18n } from 'ng-zorro-antd/i18n';
-import { registerLocaleData } from '@angular/common';
-import en from '@angular/common/locales/en';
-import { NgxEchartsModule } from 'ngx-echarts';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { authInterceptor } from './core/auth/auth.interceptor';
-import { errorInterceptor } from './core/error.interceptor';
-// 新增：图标注册
 import { provideNzIcons } from 'ng-zorro-antd/icon';
+import { zh_CN, provideNzI18n } from 'ng-zorro-antd/i18n';
+import { registerLocaleData } from '@angular/common';
+import zh from '@angular/common/locales/zh';
+import { FormsModule } from '@angular/forms';
+
 import {
+  MenuFoldOutline,
+  MenuUnfoldOutline,
+  UserOutline,
+  SettingOutline,
+  LogoutOutline,
+  DashboardOutline,
+  DatabaseOutline,
+  AlertOutline,
+  EnvironmentOutline,
   SearchOutline,
-  ReloadOutline,
   PlusOutline,
-  CloseCircleOutline,
-  WarningOutline
+  EditOutline,
+  DeleteOutline,
+  ReloadOutline,
+  WarningOutline,
+  CheckOutline,
+  DownOutline
 } from '@ant-design/icons-angular/icons';
 
-registerLocaleData(en);
+import { routes } from './app.routes';
+import { authInterceptor } from './core/auth/auth.interceptor';
+import { errorInterceptor } from './core/error.interceptor';
+
+registerLocaleData(zh);
+
+const icons = [
+  MenuFoldOutline,
+  MenuUnfoldOutline,
+  UserOutline,
+  SettingOutline,
+  LogoutOutline,
+  DashboardOutline,
+  DatabaseOutline,
+  AlertOutline,
+  EnvironmentOutline,
+  SearchOutline,
+  PlusOutline,
+  EditOutline,
+  DeleteOutline,
+  ReloadOutline,
+  WarningOutline,
+  CheckOutline,
+  DownOutline
+];
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideNzI18n(en_US),
-    provideHttpClient(
-      withInterceptors([authInterceptor, errorInterceptor])
-    ),
-    importProvidersFrom(NgxEchartsModule.forRoot({ echarts: () => import('echarts') })),
-    // 新增：全局注册图标
-    provideNzIcons([
-      SearchOutline,
-      ReloadOutline,
-      PlusOutline,
-      CloseCircleOutline,
-      WarningOutline
-    ])
-  ],
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+    provideNzIcons(icons), // 只注册图标，不需要动画
+    provideNzI18n(zh_CN),
+    importProvidersFrom(FormsModule)
+  ]
 };

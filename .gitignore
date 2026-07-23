@@ -44,3 +44,8 @@ Thumbs.db
 # === 文档临时文件 ===
 *.log
 *.tmp
+
+# === 说明文档 ===
+development.md
+requirements.md
+apicontract.md

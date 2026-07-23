@@ -1,14 +1,25 @@
-<nz-layout class="full-layout">
+<!-- src/app/core/layout/main-layout/main-layout.html -->
+<nz-layout class="main-layout">
   <!-- 左侧侧边栏 -->
-  <nz-sider nzWidth="220px" nzTheme="dark">
-    <div class="logo">智能水务算法平台</div>
+  <nz-sider 
+    nzCollapsible 
+    [(nzCollapsed)]="isCollapsed" 
+    nzWidth="220px"
+    class="sidebar"
+  >
+    <div class="logo">
+      <span *ngIf="!isCollapsed">智慧水务平台</span>
+      <span *ngIf="isCollapsed">水务</span>
+    </div>
     <ul nz-menu nzTheme="dark" nzMode="inline">
-      <li nz-menu-item 
-          *ngFor="let menu of menuList"
-          [nzDisabled]="!!menu.disabled"
-          [routerLink]="menu.path"
-          routerLinkActive="ant-menu-item-selected">
-        {{ menu.title }}
+      <li 
+        nz-menu-item 
+        *ngFor="let item of menuList" 
+        [routerLink]="item.path"
+        routerLinkActive="ant-menu-item-selected"
+      >
+        <span nz-icon [nzType]="item.icon || 'appstore'"></span>
+        <span class="nav-text">{{ item.title }}</span>
       </li>
     </ul>
   </nz-sider>
@@ -17,12 +28,55 @@
   <nz-layout>
     <!-- 顶部导航栏 -->
     <nz-header class="header">
-      <div class="header-title">智能水务算法应用平台</div>
-      <img src="/assets/images/svg/logos/Logo_1.svg" alt="系统Logo" class="logo-img">
-      <div class="header-user">管理员</div>
+      <div class="header-left">
+        <span 
+          nz-icon 
+          [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" 
+          class="collapse-btn"
+          (click)="isCollapsed = !isCollapsed"
+        ></span>
+      </div>
+      
+      <div class="header-right">
+        <!-- 用户下拉菜单 -->
+        <div nz-dropdown [nzDropdownMenu]="userMenu" nzPlacement="bottomRight">
+          <div class="user-info">
+            <nz-avatar nzSize="small" [nzText]="userInfo?.displayName?.charAt(0) || '管'"></nz-avatar>
+            <span class="username" *ngIf="!isCollapsed">{{ userInfo?.displayName || '管理员' }}</span>
+            <span nz-icon nzType="down"></span>
+          </div>
+        </div>
+        <nz-dropdown-menu #userMenu>
+          <ul nz-menu>
+            <li nz-menu-item disabled>
+              <span nz-icon nzType="user"></span>
+              个人中心
+            </li>
+            <li nz-menu-item disabled>
+              <span nz-icon nzType="setting"></span>
+              系统设置
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="logout()">
+              <span nz-icon nzType="logout"></span>
+              退出登录
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
     </nz-header>
 
-    <!-- 主内容区 -->
+    <!-- 面包屑导航 -->
+    <div class="breadcrumb-bar">
+      <nz-breadcrumb>
+        <nz-breadcrumb-item *ngFor="let item of breadcrumbs; let last = last">
+          <a *ngIf="!last" [routerLink]="item.path">{{ item.name }}</a>
+          <span *ngIf="last">{{ item.name }}</span>
+        </nz-breadcrumb-item>
+      </nz-breadcrumb>
+    </div>
+
+    <!-- 内容区域 -->
     <nz-content class="content">
       <router-outlet></router-outlet>
     </nz-content>

@@ -1,0 +1,157 @@
+<app-loading *ngIf="loading" tip="加载中..."></app-loading>
+
+<ng-container *ngIf="!loading">
+  <!-- KPI统计行 -->
+  <nz-row [nzGutter]="16" class="kpi-row">
+    <nz-col [nzSpan]="6" *ngFor="let item of kpiList">
+      <nz-card>
+        <app-kpi-card
+          [title]="item.title"
+          [value]="item.value"
+          [unit]="item.unit"
+          [color]="item.color">
+        </app-kpi-card>
+      </nz-card>
+    </nz-col>
+  </nz-row>
+
+  <!-- 筛选栏 -->
+  <nz-card class="filter-card">
+    <div class="filter-bar">
+      <nz-input-group nzSearch [nzAddOnAfter]="searchBtn" style="width: 240px; margin-right: 12px;">
+        <input nz-input placeholder="搜索告警编号/标题/位置" [(ngModel)]="keyword" (keyup.enter)="onSearch()">
+      </nz-input-group>
+      <ng-template #searchBtn>
+        <button nz-button nzType="primary" (click)="onSearch()">搜索</button>
+      </ng-template>
+
+      <nz-select [(ngModel)]="selectedType" style="width: 120px; margin-right: 12px;" (ngModelChange)="onSearch()">
+        <nz-option *ngFor="let opt of typeOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
+      </nz-select>
+
+      <nz-select [(ngModel)]="selectedLevel" style="width: 120px; margin-right: 12px;" (ngModelChange)="onSearch()">
+        <nz-option *ngFor="let opt of levelOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
+      </nz-select>
+
+      <nz-select [(ngModel)]="selectedStatus" style="width: 120px; margin-right: 12px;" (ngModelChange)="onSearch()">
+        <nz-option *ngFor="let opt of statusOptions" [nzLabel]="opt.label" [nzValue]="opt.value"></nz-option>
+      </nz-select>
+
+      <button nz-button (click)="onReset()">重置</button>
+    </div>
+  </nz-card>
+
+  <!-- 告警列表 -->
+  <nz-card class="table-card">
+    <app-empty *ngIf="alarmList.length === 0" description="暂无告警数据"></app-empty>
+    <nz-table
+      *ngIf="alarmList.length > 0"
+      [nzData]="alarmList"
+      [nzTotal]="total"
+      [nzPageIndex]="pageIndex"
+      [nzPageSize]="pageSize"
+      [nzFrontPagination]="false"
+      (nzPageIndexChange)="pageIndex = $event; loadAlarmList()"
+      nzSize="middle">
+      <thead>
+        <tr>
+          <th>告警编号</th>
+          <th>告警标题</th>
+          <th>类型</th>
+          <th>级别</th>
+          <th>位置</th>
+          <th>状态</th>
+          <th>处理人</th>
+          <th>产生时间</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let alarm of alarmList">
+          <td>{{ alarm.alarmNo }}</td>
+          <td>{{ alarm.title }}</td>
+          <td>{{ getTypeText(alarm.type) }}</td>
+          <td>
+            <nz-tag [nzColor]="getLevelColor(alarm.level)">
+              {{ getLevelText(alarm.level) }}
+            </nz-tag>
+          </td>
+          <td>{{ alarm.location }}</td>
+          <td>
+            <nz-tag [nzColor]="getStatusColor(alarm.status)">
+              {{ getStatusText(alarm.status) }}
+            </nz-tag>
+          </td>
+          <td>{{ alarm.handler || '-' }}</td>
+          <td>{{ alarm.createTime }}</td>
+          <td>
+            <a (click)="showDetail(alarm)">详情</a>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-card>
+</ng-container>
+
+<!-- 告警详情弹窗 -->
+<nz-modal
+  [(nzVisible)]="detailVisible"
+  nzTitle="告警详情"
+  nzWidth="700px"
+  (nzOnCancel)="closeDetail()"
+  [nzFooter]="null">
+  <ng-container *nzModalContent>
+    <div *ngIf="currentAlarm">
+      <!-- 基本信息 -->
+      <nz-descriptions [nzColumn]="2" nzBordered size="small">
+        <nz-descriptions-item nzTitle="告警编号">{{ currentAlarm.alarmNo }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="告警类型">{{ getTypeText(currentAlarm.type) }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="告警级别">
+          <nz-tag [nzColor]="getLevelColor(currentAlarm.level)">
+            {{ getLevelText(currentAlarm.level) }}
+          </nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="告警状态">
+          <nz-tag [nzColor]="getStatusColor(currentAlarm.status)">
+            {{ getStatusText(currentAlarm.status) }}
+          </nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="告警位置" [nzSpan]="2">{{ currentAlarm.location }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="告警来源">{{ currentAlarm.source }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="处理人">{{ currentAlarm.handler || '-' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="产生时间">{{ currentAlarm.createTime }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="更新时间">{{ currentAlarm.updateTime }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="告警描述" [nzSpan]="2">{{ currentAlarm.description }}</nz-descriptions-item>
+      </nz-descriptions>
+
+      <!-- 处置时间轴 -->
+      <h4 style="margin: 24px 0 12px;">处置记录</h4>
+      <nz-timeline>
+        <nz-timeline-item *ngFor="let record of disposeRecords" [nzColor]="getActionColor(record.action)">
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <span class="action">{{ getActionText(record.action) }}</span>
+              <span class="operator">{{ record.operator }}</span>
+              <span class="time">{{ record.createTime }}</span>
+            </div>
+            <div class="remark" *ngIf="record.remark">{{ record.remark }}</div>
+          </div>
+        </nz-timeline-item>
+      </nz-timeline>
+
+      <!-- 处置操作 -->
+      <div *ngIf="currentAlarm.status !== 'closed'" style="margin-top: 24px;">
+        <h4>处置操作</h4>
+        <nz-textarea-count [nzMaxCharacterCount]="200" style="width: 100%;">
+          <textarea nz-input [(ngModel)]="disposeRemark" rows="3" placeholder="请输入处置备注（可选）"></textarea>
+        </nz-textarea-count>
+        <div style="margin-top: 12px; text-align: right;">
+          <button nz-button *ngIf="currentAlarm.status === 'pending'" (click)="onDispose('confirm')" [nzLoading]="disposeLoading" style="margin-right: 8px;">确认告警</button>
+          <button nz-button nzType="primary" *ngIf="currentAlarm.status === 'pending' || currentAlarm.status === 'processing'" (click)="onDispose('dispatch')" [nzLoading]="disposeLoading" style="margin-right: 8px;">派单处理</button>
+          <button nz-button *ngIf="currentAlarm.status === 'processing'" (click)="onDispose('process')" [nzLoading]="disposeLoading" style="margin-right: 8px;">标记已处理</button>
+          <button nz-button nzDanger (click)="onDispose('close')" [nzLoading]="disposeLoading">关闭告警</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</nz-modal>

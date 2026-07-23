@@ -1,43 +1,44 @@
-<div class="login-wrapper">
-  <nz-card class="login-card">
-    <div class="login-title">智能水务算法应用平台</div>
-    <form nz-form>
-      <nz-form-item>
-        <nz-form-label>用户名</nz-form-label>
-        <nz-form-control>
-          <input 
-            nz-input 
-            placeholder="请输入用户名" 
-            [(ngModel)]="loginForm.username"
-            name="username"
-            (keyup.enter)="onLogin()"
-          />
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label>密码</nz-form-label>
-        <nz-form-control>
-          <input 
-            nz-input 
-            type="password" 
-            placeholder="请输入密码" 
-            [(ngModel)]="loginForm.password"
-            name="password"
-            (keyup.enter)="onLogin()"
-          />
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <button 
-          nz-button 
-          nzType="primary" 
-          class="login-form-button"
-          [nzLoading]="loading"
-          (click)="onLogin()"
-        >
-          登 录
-        </button>
-      </nz-form-item>
+<!-- src/app/core/auth/login.html -->
+<div class="login-container">
+  <div class="login-box">
+    <h2 class="login-title">智慧水务算法平台</h2>
+    <form class="login-form" (ngSubmit)="onSubmit()">
+      <nz-input-group nzPrefixIcon="user" style="margin-bottom: 20px;">
+        <input 
+          nz-input 
+          type="text" 
+          placeholder="用户名" 
+          [(ngModel)]="username"
+          name="username"
+          (keyup.enter)="onSubmit()"
+        />
+      </nz-input-group>
+      
+      <nz-input-group nzPrefixIcon="lock">
+        <input 
+          nz-input 
+          type="password" 
+          placeholder="密码" 
+          [(ngModel)]="password"
+          name="password"
+          (keyup.enter)="onSubmit()"
+        />
+      </nz-input-group>
+
+      <div class="login-options">
+        <label nz-checkbox [(ngModel)]="remember" name="remember">记住我</label>
+        <a style="color: #1890ff;">忘记密码？</a>
+      </div>
+
+      <button 
+        nz-button 
+        nzType="primary" 
+        class="login-btn" 
+        [nzLoading]="loading"
+        (click)="onSubmit()"
+      >
+        登 录
+      </button>
     </form>
-  </nz-card>
+  </div>
 </div>

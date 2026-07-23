@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 // 通用 KPI 指标卡片
 // 文档要求：标题 16px、指标数字 24px 加粗、单位小字、趋势可缺省
+=======
+>>>>>>> master
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -63,4 +66,8 @@ export class KpiCardComponent {
     if (!this.trend) return '#999';
     return this.trend.startsWith('+') ? '#f5222d' : '#52c41a';
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> master
