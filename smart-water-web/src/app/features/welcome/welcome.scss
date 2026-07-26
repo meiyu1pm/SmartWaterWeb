@@ -1,0 +1,177 @@
+// 页面全局：增加最小宽度约束
+:host {
+  display: block;
+  width: 100%;
+  min-width: 1200px;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+// ========== 顶部导航栏 ==========
+.nav-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-width: 1200px;
+  height: 64px;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  color: #fff;
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .logo-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      .logo-img {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+    }
+
+    .platform-name {
+      font-size: 18px;
+      font-weight: 500;
+    }
+  }
+
+  .nav-right {
+    display: flex;
+    gap: 32px;
+    .nav-item {
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      transition: opacity 0.3s;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+// ========== Hero 沉浸主视觉区 ==========
+.hero-section {
+  width: 100%;
+  height: 70vh;
+  // 对标截图的蓝绿渐变背景
+  background: linear-gradient(135deg, #2c5364 0%, #203a43 50%, #0f2027 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding-top: 64px;
+
+  .hero-content {
+    text-align: center;
+    .hero-subtitle-en {
+      font-size: 20px;
+      letter-spacing: 4px;
+      opacity: 0.9;
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      font-size: 48px;
+      font-weight: 600;
+      margin: 0 0 20px 0;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .hero-desc {
+      font-size: 20px;
+      opacity: 0.85;
+      margin-bottom: 40px;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+
+      .btn-primary {
+        background: #cf1322;
+        border-color: #cf1322;
+        height: 48px;
+        padding: 0 32px;
+        font-size: 16px;
+        transition: all 0.3s;
+        &:hover {
+          background: #a8071a;
+          border-color: #a8071a;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(207, 19, 34, 0.3);
+        }
+      }
+      .btn-default {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.6);
+        color: #fff;
+        height: 48px;
+        padding: 0 32px;
+        font-size: 16px;
+        transition: all 0.3s;
+        &:hover {
+          background: rgba(255,255,255,0.2);
+          border-color: #fff;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+}
+
+// ========== 底部功能入口区 ==========
+.feature-section {
+  padding: 40px;
+  min-width: 1200px;
+  .feature-list {
+    max-width: 1200px;
+    min-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+
+    .feature-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid #e8e8e8;
+
+      &:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        border-color: #1890ff;
+      }
+
+      .feature-icon {
+        font-size: 36px;
+        color: #1890ff;
+        margin-bottom: 16px;
+      }
+      .feature-title {
+        margin: 0;
+        font-size: 16px;
+        color: #333;
+      }
+    }
+  }
+}

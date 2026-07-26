@@ -1,0 +1,8 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- G形外轮廓 -->
+  <path d="M24 12 A12 12 0 1 0 36 24 L30 24 A6 6 0 1 1 24 18 L24 20" stroke="#cf1322" stroke-width="3" fill="none"/>
+  <!-- 内部向上箭头 -->
+  <path d="M24 16 L32 28 L16 28 Z" fill="#cf1322"/>
+  <!-- 底部平台缩写 -->
+  <text x="24" y="38" text-anchor="middle" fill="#cf1322" font-size="7" font-weight="bold">PLAT</text>
+</svg>

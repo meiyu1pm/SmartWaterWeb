@@ -1,0 +1,42 @@
+<!-- 顶部导航栏 -->
+<header class="nav-header">
+
+  <div class="nav-left">
+    <div class="logo-circle">
+      <!-- public 静态资源直接用 /文件名 引用 -->
+      <img src="/logo.svg" alt="平台logo" class="logo-img">
+    </div>
+    <span class="platform-name">{{ welcomeData?.platform_name || '中国市政华北院' }}</span>
+  </div>
+
+  <nav class="nav-right">
+    <a href="#" class="nav-item">首页</a>
+    <a href="#" class="nav-item">政务公开</a>
+    <a href="#" class="nav-item">办事服务</a>
+  </nav>
+</header>
+
+<!-- Hero 主视觉沉浸区 -->
+<section class="hero-section">
+  <div class="hero-content">
+    <p class="hero-subtitle-en">WELCOME TO</p>
+    <h1 class="hero-title">{{ welcomeData?.welcome_text || '欢迎使用平台' }}</h1>
+    <p class="hero-desc">共建共享 · 惠民利民 · 数字水务</p>
+    <div class="hero-buttons">
+      <button nz-button nzType="primary" nzSize="large" class="btn-primary">进入办事大厅</button>
+      <button nz-button nzSize="large" class="btn-default">了解平台概况</button>
+    </div>
+  </div>
+</section>
+
+<!-- 底部功能入口区 -->
+<section class="feature-section">
+  <div class="feature-list">
+    @for (item of featureList; track item.title) {
+      <div class="feature-card" [routerLink]="item.path">
+        <i nz-icon [nzType]="item.icon" nzTheme="outline" class="feature-icon"></i>
+        <p class="feature-title">{{ item.title }}</p>
+      </div>
+    }
+  </div>
+</section>

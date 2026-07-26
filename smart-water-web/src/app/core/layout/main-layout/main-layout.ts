@@ -93,16 +93,15 @@ export class MainLayout implements OnInit {
    * 根据当前路由生成面包屑
    */
   private generateBreadcrumbs(): void {
-    const currentPath = this.router.url;
-    this.breadcrumbs = [
-      { name: '首页', path: '/dashboard' }
-    ];
-
-    const currentMenu = this.visibleMenuList.find(item => currentPath.startsWith(item.path));
-    if (currentMenu && currentMenu.path !== '/dashboard') {
-      this.breadcrumbs.push({
-        name: currentMenu.title,
-        path: currentMenu.path
+  const currentPath = this.router.url;
+  this.breadcrumbs = [
+    { name: '首页', path: '/welcome' }
+  ];
+  const currentMenu = this.visibleMenuList.find(item => currentPath.startsWith(item.path));
+  if (currentMenu) {
+    this.breadcrumbs.push({
+      name: currentMenu.title,
+      path: currentMenu.path
       });
     }
   }

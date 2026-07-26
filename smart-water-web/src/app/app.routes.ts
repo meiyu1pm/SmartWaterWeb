@@ -8,10 +8,16 @@ import { LoginComponent } from './core/auth/login.component';
 import { authGuard } from './core/auth/auth.guard';
 import { Waterlogging } from './features/waterlogging/waterlogging';
 import { AlarmDisposeComponent } from './features/alarm-dispose/alarm-dispose';
+// 新增导入欢迎页组件
+import { Welcome } from  './features/welcome/welcome'
 
 
 export const routes: Routes = [
-  // 登录页，独立全屏，不需要主布局
+  // 根路径默认跳转欢迎页
+  { path: '', redirectTo: 'welcome', pathMatch: 'full' },
+  // 欢迎页：独立全屏页面
+  { path: 'welcome', component: Welcome, title: '智慧水务平台' },
+  // 登录页：独立全屏页面
   {
     path: 'login',
     component: LoginComponent,
