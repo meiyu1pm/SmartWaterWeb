@@ -1,14 +1,12 @@
 <!-- 顶部筛选栏 -->
 <div class="filter-bar">
-  <nz-select style="width: 200px;" nzPlaceHolder="选择分区/DMA">
+  <nz-select [(ngModel)]="selectedArea" style="width: 200px;" nzPlaceHolder="选择分区/DMA">
     <nz-option nzLabel="全部分区" nzValue="all"></nz-option>
     <nz-option nzLabel="经开6分区" nzValue="area1"></nz-option>
     <nz-option nzLabel="纬二路片区" nzValue="area2"></nz-option>
   </nz-select>
-
-  <nz-range-picker style="margin-left: 16px;"></nz-range-picker>
-
-  <button nz-button nzType="primary" style="margin-left: 16px;">运行分析</button>
+  <nz-range-picker [(ngModel)]="dateRange" style="margin-left: 16px;"></nz-range-picker>
+  <button nz-button nzType="primary" style="margin-left: 16px;" (click)="onSearch()">运行分析</button>
   <button nz-button style="margin-left: 8px;">导出报告</button>
 </div>
 

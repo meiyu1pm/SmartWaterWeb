@@ -1,4 +1,3 @@
-// src/app/core/auth/permission.service.ts
 import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 
@@ -12,11 +11,6 @@ export class PermissionService {
    */
   hasPerm(permission: string): boolean {
     const permissions = this.authService.getPermissions();
-    // admin 角色默认拥有全部权限
-    const roles = this.authService.getUserInfo()?.roles || [];
-    if (roles.includes('admin')) {
-      return true;
-    }
     return permissions.includes(permission);
   }
 

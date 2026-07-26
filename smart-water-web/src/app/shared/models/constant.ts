@@ -178,13 +178,6 @@ export const QUALITY_LEVEL_OPTIONS = Object.keys(QUALITY_LEVEL_TEXT).map(value =
   value
 }));
 
-/* 根据Qscore获取质量等级 */
-export function getQualityLevel(score: number): string {
-  if (score >= 90) return QUALITY_LEVEL.EXCELLENT;
-  if (score >= 80) return QUALITY_LEVEL.GOOD;
-  if (score >= 60) return QUALITY_LEVEL.WARNING;
-  return QUALITY_LEVEL.POOR;
-}
 
 /* ============ 分析任务状态 ============ */
 export const TASK_STATUS = {

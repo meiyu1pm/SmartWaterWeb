@@ -147,35 +147,38 @@ export class Waterlogging implements OnInit, AfterViewInit, OnDestroy {
    * 加载所有页面数据
    */
   loadData(): void {
-    this.loading = true;
-    const loadingId = this.notify.loading('加载数据中...');
+  this.loading = true;
+  const loadingId = this.notify.loading('加载数据中...');
 
-    // 并行加载所有接口
-    Promise.all([
-      this.waterloggingService.getKpiList(this.selectedArea).toPromise(),
-      this.waterloggingService.getPondingPoints().toPromise(),
-      this.waterloggingService.getRainTrendData().toPromise(),
-      this.waterloggingService.getPumpStatusList().toPromise(),
-      this.waterloggingService.getAlarmList().toPromise(),
-      this.waterloggingService.getDispatchPlans().toPromise()
-    ]).then(([kpiRes, pondingRes, rainRes, pumpRes, alarmRes, planRes]) => {
-      this.kpiList = kpiRes?.data || [];
-      this.pondingList = pondingRes?.data || [];
-      this.rainTrendData = rainRes?.data || [];
-      this.pumpList = pumpRes?.data || [];
-      this.alarmList = alarmRes?.data || [];
-      this.dispatchPlans = planRes?.data || [];
-
-      // 更新图表
-      this.updateRainChart();
-      this.notify.removeLoading(loadingId);
-      this.loading = false;
-    }).catch(err => {
-      this.notify.removeLoading(loadingId);
-      this.loading = false;
-      this.notify.error('数据加载失败：' + err?.message);
-    });
+  const params: any = { area: this.selectedArea };
+  if (this.selectedTime.length === 2) {
+    params.startTime = this.selectedTime[0].toISOString();
+    params.endTime = this.selectedTime[1].toISOString();
   }
+
+  Promise.all([
+    this.waterloggingService.getKpiList(this.selectedArea).toPromise(),
+    this.waterloggingService.getPondingPoints().toPromise(),
+    this.waterloggingService.getRainTrendData().toPromise(),
+    this.waterloggingService.getPumpStatusList().toPromise(),
+    this.waterloggingService.getAlarmList().toPromise(),
+    this.waterloggingService.getDispatchPlans().toPromise()
+  ]).then(([kpiRes, pondingRes, rainRes, pumpRes, alarmRes, planRes]) => {
+    this.kpiList = kpiRes?.data || [];
+    this.pondingList = pondingRes?.data || [];
+    this.rainTrendData = rainRes?.data || [];
+    this.pumpList = pumpRes?.data || [];
+    this.alarmList = alarmRes?.data || [];
+    this.dispatchPlans = planRes?.data || [];
+    this.updateRainChart();
+    this.notify.removeLoading(loadingId);
+    this.loading = false;
+  }).catch(err => {
+    this.notify.removeLoading(loadingId);
+    this.loading = false;
+    this.notify.error('数据加载失败：' + err?.message);
+  });
+}
 
   /**
    * 初始化降雨-水位-流量图表

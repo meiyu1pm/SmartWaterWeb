@@ -35,8 +35,7 @@ import {
   QUALITY_LEVEL_OPTIONS,
   METRIC_CODE_TEXT,
   PAGE_SIZE,
-  PAGE_SIZE_OPTIONS,
-  getQualityLevel
+  PAGE_SIZE_OPTIONS
 } from '../../shared/models/constant';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ApiResponse, PageResult } from '../../shared/models/api-response';
