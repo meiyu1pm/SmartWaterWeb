@@ -11,6 +11,7 @@ from app.modules.waterlogging.router import router as waterlogging_router
 from app.modules.algorithm.router import router as algorithm_router
 from app.modules.task.router import router as task_router
 from app.modules.alarm.router import router as alarm_router
+from app.modules.dashboard.router import router as dashboard_router
 
 
 def create_app() -> FastAPI:
@@ -26,6 +27,8 @@ def create_app() -> FastAPI:
 
     app.include_router(health_router, tags=["健康检查"])
     app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["认证"])
+    # 新增：注册dashboard路由
+    app.include_router(dashboard_router, prefix=f"{settings.API_V1_STR}/dashboard", tags=["综合驾驶舱"])
     app.include_router(leakage_router, prefix=f"{settings.API_V1_STR}/leakage", tags=["漏损控制"])
     app.include_router(data_source_router, prefix=f"{settings.API_V1_STR}/data-sources", tags=["数据源管理"])
     app.include_router(data_quality_router, prefix=f"{settings.API_V1_STR}/data-quality", tags=["数据质量"])
